@@ -49,6 +49,7 @@ library
     HotGoss
     HotGoss.Challenge1
     HotGoss.Protocol
+    HotGoss.Union
 
 executable hotgoss
   import:
