@@ -13,6 +13,7 @@ common common
     , relude
   default-language: GHC2021
   default-extensions:
+    LambdaCase
     OverloadedStrings
   ghc-options:
     -Wall
@@ -37,6 +38,8 @@ common executable
 library
   import: common
   hs-source-dirs: src
+  build-depends:
+    , text
   exposed-modules:
     HotGoss
 

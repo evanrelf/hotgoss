@@ -1,4 +1,10 @@
 module HotGoss (main) where
 
+import qualified Data.Text.IO as Text
+
 main :: IO ()
-main = putStrLn "Hello, world!"
+main = do
+  getArgs >>= \case
+    _ -> do
+      Text.hPutStrLn stderr "usage: hotgoss CHALLENGE [ARG...]"
+      exitFailure
