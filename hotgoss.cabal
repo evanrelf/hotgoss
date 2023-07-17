@@ -15,6 +15,7 @@ common common
   default-extensions:
     BlockArguments
     DerivingStrategies
+    DuplicateRecordFields
     LambdaCase
     OverloadedRecordDot
     OverloadedStrings

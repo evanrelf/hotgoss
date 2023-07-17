@@ -1,5 +1,3 @@
-{-# LANGUAGE DuplicateRecordFields #-}
-
 module HotGoss.Protocol
   ( Message (..)
   , Init (..)
