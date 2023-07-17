@@ -18,6 +18,10 @@ data Union (r :: [Type]) where
   This :: a -> Union (a : r)
   Next :: Union r -> Union (any : r)
 
+deriving instance Show (Union '[])
+
+deriving instance (Show a, Show (Union r)) => Show (Union (a : r))
+
 class Member a r where
   inject :: a -> Union r
   project :: Union r -> Maybe a
