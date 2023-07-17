@@ -2,6 +2,7 @@ module HotGoss.Protocol
   ( Message (..)
   , send
   , receive
+  , handle
   , log
   , Init (..)
   , InitOk (..)
@@ -55,6 +56,16 @@ receive :: (FromJSON a, MonadIO m) => m (Message a)
 receive = do
   bytes <- encodeUtf8 <$> getLine
   either Exception.throwString pure $ eitherDecode' bytes
+
+handle :: (FromJSON a, ToJSON b, MonadIO m) => (a -> m b) -> m ()
+handle k = do
+  message <- receive
+  body <- k message.body
+  send message
+    { source = message.destination
+    , destination = message.source
+    , body
+    }
 
 log :: MonadIO m => Text -> m ()
 log message = do

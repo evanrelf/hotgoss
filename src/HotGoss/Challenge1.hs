@@ -64,37 +64,15 @@ main = do
 
   let getMessageId = atomicModifyIORef' messageIdRef \mid -> (mid + 1, mid)
 
-  init <- receive @Init
+  handle @Init \init -> do
+    pure InitOk
+      { inReplyTo = init.messageId
+      }
 
-  let source = init.body.nodeId
-
-  let initOk =
-        Message
-          { source
-          , destination = init.source
-          , body =
-              InitOk
-                { inReplyTo = init.body.messageId
-                }
-          }
-
-  send @InitOk initOk
-
-  forever do
-    echo <- receive @Echo
-
+  forever $ handle @Echo \echo -> do
     messageId <- getMessageId
-
-    let echoOk =
-          Message
-            { source
-            , destination = echo.source
-            , body =
-                EchoOk
-                  { messageId
-                  , inReplyTo = echo.body.messageId
-                  , echo = echo.body.echo
-                  }
-            }
-
-    send @EchoOk echoOk
+    pure EchoOk
+      { messageId
+      , inReplyTo = echo.messageId
+      , echo = echo.echo
+      }
