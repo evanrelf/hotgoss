@@ -11,6 +11,9 @@ module HotGoss.Union
   )
 where
 
+import Data.Aeson
+import Data.Aeson.Types (Parser)
+
 data Union (r :: [Type]) where
   This :: a -> Union (a : r)
   Next :: Union r -> Union (any : r)
@@ -53,3 +56,19 @@ extract :: Union '[a] -> a
 extract = \case
   This a -> a
   Next u -> case u of
+
+instance ToJSON a => ToJSON (Union '[a]) where
+  toJSON :: Union '[a] -> Value
+  toJSON = toJSON . extract
+
+instance {-# OVERLAPPABLE #-} (ToJSON a, ToJSON (Union r)) => ToJSON (Union (a : r)) where
+  toJSON :: Union (a : r) -> Value
+  toJSON = either toJSON toJSON . decompose
+
+instance FromJSON a => FromJSON (Union '[a]) where
+  parseJSON :: Value -> Parser (Union '[a])
+  parseJSON v = This <$> parseJSON v
+
+instance {-# OVERLAPPABLE #-} (FromJSON a, FromJSON (Union r)) => FromJSON (Union (a : r)) where
+  parseJSON :: Value -> Parser (Union (a : r))
+  parseJSON v = This <$> parseJSON v <|> Next <$> parseJSON v
