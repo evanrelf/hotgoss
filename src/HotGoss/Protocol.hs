@@ -47,7 +47,7 @@ instance ToJSON Init where
   toJSON :: Init -> Value
   toJSON init =
     object
-      [ "type" .= init.type_
+      [ "type" .= ("init" :: Text)
       , "msg_id" .= init.messageId
       , "node_id" .= init.nodeId
       , "node_ids" .= init.nodeIds
@@ -57,15 +57,15 @@ instance FromJSON Init where
   parseJSON :: Value -> Parser Init
   parseJSON =
     withObject "Init" \o -> do
-      type_ <- o .: "type"
+      type_ :: Text <- o .: "type"
+      guard (type_ == "init")
       messageId <- o .: "msg_id"
       nodeId <- o .: "node_id"
       nodeIds <- o .: "node_ids"
-      pure Init{ type_, messageId, nodeId, nodeIds }
+      pure Init{ messageId, nodeId, nodeIds }
 
-data InitOk = InitOk
-  { type_ :: Text
-  , inReplyTo :: Word
+newtype InitOk = InitOk
+  { inReplyTo :: Word
   }
   deriving stock (Show)
 
@@ -73,7 +73,7 @@ instance ToJSON InitOk where
   toJSON :: InitOk -> Value
   toJSON initOk =
     object
-      [ "type" .= initOk.type_
+      [ "type" .= ("init_ok" :: Text)
       , "in_reply_to" .= initOk.inReplyTo
       ]
 
@@ -81,6 +81,7 @@ instance FromJSON InitOk where
   parseJSON :: Value -> Parser InitOk
   parseJSON =
     withObject "InitOk" \o -> do
-      type_ <- o .: "type"
+      type_ :: Text <- o .: "type"
+      guard (type_ == "init_ok")
       inReplyTo <- o .: "in_reply_to"
-      pure InitOk{ type_, inReplyTo }
+      pure InitOk{ inReplyTo }
