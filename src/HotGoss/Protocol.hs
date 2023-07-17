@@ -37,8 +37,7 @@ instance FromJSON a => FromJSON (Message a) where
       pure Message{ source, destination, body }
 
 data Init = Init
-  { type_ :: Text
-  , messageId :: Maybe Int
+  { messageId :: Maybe Word
   , nodeId :: Text
   , nodeIds :: [Text]
   }
@@ -66,7 +65,7 @@ instance FromJSON Init where
 
 data InitOk = InitOk
   { type_ :: Text
-  , inReplyTo :: Int
+  , inReplyTo :: Word
   }
   deriving stock (Show)
 
