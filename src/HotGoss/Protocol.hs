@@ -4,12 +4,13 @@ module HotGoss.Protocol
   ( Message (..)
   , Init (..)
   , InitOk (..)
+  , Error (..)
   )
 where
 
-import Data.Aeson
+import Data.Aeson hiding (Error)
 import Data.Aeson.Types (Parser)
-import Prelude hiding (init)
+import Prelude hiding (error, init)
 
 data Message a = Message
   { source :: Text
@@ -85,3 +86,33 @@ instance FromJSON InitOk where
       guard (type_ == "init_ok")
       inReplyTo <- o .: "in_reply_to"
       pure InitOk{ inReplyTo }
+
+data Error = Error
+  { inReplyTo :: Word
+  , code :: Word
+  , text :: Maybe Text
+    -- TODO: Can include other arbitrary fields
+  }
+  deriving stock (Show)
+
+instance ToJSON Error where
+  toJSON :: Error -> Value
+  toJSON error =
+    object
+      [ "type" .= ("error" :: Text)
+      , "in_reply_to" .= error.inReplyTo
+      , "code" .= error.code
+        -- TODO: Omit `text` when `Nothing`
+      , "text" .= error.text
+      ]
+
+instance FromJSON Error where
+  parseJSON :: Value -> Parser Error
+  parseJSON =
+    withObject "Error" \o -> do
+      type_ :: Text <- o .: "type"
+      guard (type_ == "error")
+      inReplyTo <- o .: "in_reply_to"
+      code <- o .: "code"
+      text <- o .:? "text"
+      pure Error{ inReplyTo, code, text }
