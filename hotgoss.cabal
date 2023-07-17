@@ -13,7 +13,9 @@ common common
     , relude
   default-language: GHC2021
   default-extensions:
+    BlockArguments
     LambdaCase
+    OverloadedRecordDot
     OverloadedStrings
   ghc-options:
     -Wall
@@ -39,11 +41,13 @@ library
   import: common
   hs-source-dirs: src
   build-depends:
+    , aeson
     , text
     , unliftio
   exposed-modules:
     HotGoss
     HotGoss.Challenge1
+    HotGoss.Protocol
 
 executable hotgoss
   import:
