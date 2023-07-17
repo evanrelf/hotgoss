@@ -40,8 +40,10 @@ library
   hs-source-dirs: src
   build-depends:
     , text
+    , unliftio
   exposed-modules:
     HotGoss
+    HotGoss.Challenge1
 
 executable hotgoss
   import:
