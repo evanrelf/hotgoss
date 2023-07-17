@@ -5,6 +5,9 @@ module HotGoss.Protocol
   , Init (..)
   , InitOk (..)
   , Error (..)
+  , ErrorCode (..)
+  , toErrorCode
+  , fromErrorCode
   )
 where
 
@@ -89,7 +92,7 @@ instance FromJSON InitOk where
 
 data Error = Error
   { inReplyTo :: Word
-  , code :: Word
+  , code :: ErrorCode
   , text :: Maybe Text
     -- TODO: Can include other arbitrary fields
   }
@@ -101,7 +104,7 @@ instance ToJSON Error where
     object
       [ "type" .= ("error" :: Text)
       , "in_reply_to" .= error.inReplyTo
-      , "code" .= error.code
+      , "code" .= fromErrorCode error.code
         -- TODO: Omit `text` when `Nothing`
       , "text" .= error.text
       ]
@@ -113,6 +116,51 @@ instance FromJSON Error where
       type_ :: Text <- o .: "type"
       guard (type_ == "error")
       inReplyTo <- o .: "in_reply_to"
-      code <- o .: "code"
+      code <- toErrorCode <$> o .: "code"
       text <- o .:? "text"
       pure Error{ inReplyTo, code, text }
+
+data ErrorCode
+  = Timeout
+  | NodeNotFound
+  | NotSupported
+  | TemporarilyUnavailable
+  | MalformedRequest
+  | Crash
+  | Abort
+  | KeyDoesNotExist
+  | KeyAlreadyExists
+  | PreconditionFailed
+  | TransactionConflict
+  | Unknown Word
+  deriving stock (Show)
+
+toErrorCode :: Word -> ErrorCode
+toErrorCode = \case
+  0 -> Timeout
+  1 -> NodeNotFound
+  10 -> NotSupported
+  11 -> TemporarilyUnavailable
+  12 -> MalformedRequest
+  13 -> Crash
+  14 -> Abort
+  20 -> KeyDoesNotExist
+  21 -> KeyAlreadyExists
+  22 -> PreconditionFailed
+  30 -> TransactionConflict
+  n -> Unknown n
+
+fromErrorCode :: ErrorCode -> Word
+fromErrorCode = \case
+  Timeout -> 0
+  NodeNotFound -> 1
+  NotSupported -> 10
+  TemporarilyUnavailable -> 11
+  MalformedRequest -> 12
+  Crash -> 13
+  Abort -> 14
+  KeyDoesNotExist -> 20
+  KeyAlreadyExists -> 21
+  PreconditionFailed -> 22
+  TransactionConflict -> 30
+  Unknown n -> n
