@@ -55,7 +55,7 @@ receive = do
   either Exception.throwString pure $ eitherDecode' bytes
 
 data Init = Init
-  { messageId :: Maybe Word
+  { messageId :: Word
   , nodeId :: Text
   , nodeIds :: [Text]
   }

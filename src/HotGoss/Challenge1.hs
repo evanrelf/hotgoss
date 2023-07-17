@@ -3,7 +3,7 @@ module HotGoss.Challenge1 (main) where
 import Data.Aeson
 import Data.Aeson.Types (Parser)
 import HotGoss.Protocol
-import HotGoss.Union
+import Prelude hiding (init)
 
 data Echo = Echo
   { messageId :: Word
@@ -59,4 +59,38 @@ instance FromJSON EchoOk where
       pure EchoOk{ messageId, inReplyTo, echo }
 
 main :: IO ()
-main = pure ()
+main = do
+  messageIdRef <- newIORef 1
+
+  init <- receive @Init
+
+  let initOk =
+        Message
+          { source = init.destination
+          , destination = init.source
+          , body =
+              InitOk
+                { inReplyTo = init.body.messageId
+                }
+          }
+
+  send @InitOk initOk
+
+  forever do
+    echo <- receive @Echo
+
+    messageId <- atomicModifyIORef' messageIdRef \mid -> (mid + 1, mid)
+
+    let echoOk =
+          Message
+            { source = echo.destination
+            , destination = echo.source
+            , body =
+                EchoOk
+                  { messageId
+                  , inReplyTo = echo.body.messageId
+                  , echo = echo.body.echo
+                  }
+            }
+
+    send @EchoOk echoOk
