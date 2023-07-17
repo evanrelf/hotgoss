@@ -52,7 +52,7 @@ library
     HotGoss.Protocol
     HotGoss.Union
 
-executable hotgoss
+executable hotgoss-1
   import:
     , common
     , executable

@@ -6,9 +6,9 @@ import qualified UnliftIO.Environment as Environment
 
 main :: IO ()
 main = do
-  getArgs >>= \case
-    "1" : args ->
-      Environment.withArgs args HotGoss.Challenge1.main
-    _ -> do
-      Text.hPutStrLn stderr "usage: hotgoss CHALLENGE [ARG...]"
+  Environment.getProgName >>= \case
+    "hotgoss-1" ->
+      HotGoss.Challenge1.main
+    program -> do
+      Text.hPutStrLn stderr $ "wtf does '" <> toText program <> "' mean"
       exitFailure

@@ -62,11 +62,15 @@ main :: IO ()
 main = do
   messageIdRef <- newIORef 1
 
+  let getMessageId = atomicModifyIORef' messageIdRef \mid -> (mid + 1, mid)
+
   init <- receive @Init
+
+  let source = init.body.nodeId
 
   let initOk =
         Message
-          { source = init.destination
+          { source
           , destination = init.source
           , body =
               InitOk
@@ -79,11 +83,11 @@ main = do
   forever do
     echo <- receive @Echo
 
-    messageId <- atomicModifyIORef' messageIdRef \mid -> (mid + 1, mid)
+    messageId <- getMessageId
 
     let echoOk =
           Message
-            { source = echo.destination
+            { source
             , destination = echo.source
             , body =
                 EchoOk

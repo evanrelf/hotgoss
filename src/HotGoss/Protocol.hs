@@ -2,6 +2,7 @@ module HotGoss.Protocol
   ( Message (..)
   , send
   , receive
+  , log
   , Init (..)
   , InitOk (..)
   , Error (..)
@@ -16,6 +17,7 @@ import Data.Aeson.Types (Parser)
 import Prelude hiding (error, init)
 
 import qualified Data.ByteString.Lazy as LByteString
+import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
 data Message a = Message
@@ -45,7 +47,7 @@ instance FromJSON a => FromJSON (Message a) where
 
 send :: (ToJSON a, MonadIO m) => Message a -> m ()
 send message = do
-  let bytes = encode message
+  let bytes = encode message <> "\n"
   liftIO $ LByteString.hPut stdout bytes
   hFlush stdout
 
@@ -53,6 +55,11 @@ receive :: (FromJSON a, MonadIO m) => m (Message a)
 receive = do
   bytes <- encodeUtf8 <$> getLine
   either Exception.throwString pure $ eitherDecode' bytes
+
+log :: MonadIO m => Text -> m ()
+log message = do
+  liftIO $ Text.hPutStrLn stderr message
+  hFlush stdout
 
 data Init = Init
   { messageId :: Word
@@ -82,7 +89,7 @@ instance FromJSON Init where
       nodeIds <- o .: "node_ids"
       pure Init{ messageId, nodeId, nodeIds }
 
-newtype InitOk = InitOk
+data InitOk = InitOk
   { inReplyTo :: Word
   }
   deriving stock (Show)

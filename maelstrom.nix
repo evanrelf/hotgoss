@@ -23,6 +23,6 @@ pkgs.stdenv.mkDerivation {
     EOF
     chmod +x $out/bin/maelstrom
     wrapProgram $out/bin/maelstrom \
-      --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.jdk ]}
+      --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.gnuplot pkgs.jdk ]}
   '';
 }
