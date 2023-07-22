@@ -14,7 +14,9 @@ common common
   default-language: GHC2021
   default-extensions:
     BlockArguments
+    DataKinds
     DerivingStrategies
+    DerivingVia
     DuplicateRecordFields
     LambdaCase
     OverloadedRecordDot
@@ -44,6 +46,7 @@ library
   hs-source-dirs: src
   build-depends:
     , aeson
+    , deriving-aeson
     , text
     , unliftio
   exposed-modules:

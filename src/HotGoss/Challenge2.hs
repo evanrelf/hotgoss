@@ -1,58 +1,22 @@
 module HotGoss.Challenge2 (main) where
 
-import Data.Aeson
-import Data.Aeson.Types (Parser)
+import Data.Aeson (FromJSON, ToJSON)
 import HotGoss.Protocol
 import Prelude hiding (id)
 
 data Generate = Generate
   { msg_id :: Word
   }
-  deriving stock (Show)
-
-instance ToJSON Generate where
-  toJSON :: Generate -> Value
-  toJSON body =
-    object
-      [ "type" .= ("generate" :: Text)
-      , "msg_id" .= body.msg_id
-      ]
-
-instance FromJSON Generate where
-  parseJSON :: Value -> Parser Generate
-  parseJSON =
-    withObject "Generate" \o -> do
-      type_ :: Text <- o .: "type"
-      guard (type_ == "generate")
-      msg_id <- o .: "msg_id"
-      pure Generate{ msg_id }
+  deriving stock (Generic, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON "generate" '[] Generate
 
 data GenerateOk = GenerateOk
   { msg_id :: Word
   , in_reply_to :: Word
   , id :: Text
   }
-  deriving stock (Show)
-
-instance ToJSON GenerateOk where
-  toJSON :: GenerateOk -> Value
-  toJSON body =
-    object
-      [ "type" .= ("generate_ok" :: Text)
-      , "in_reply_to" .= body.in_reply_to
-      , "id" .= body.id
-      ]
-
-instance FromJSON GenerateOk where
-  parseJSON :: Value -> Parser GenerateOk
-  parseJSON =
-    withObject "GenerateOk" \o -> do
-      type_ :: Text <- o .: "type"
-      guard (type_ == "generate_ok")
-      msg_id <- o .: "msg_id"
-      in_reply_to <- o .: "inReplyTo"
-      id <- o .: "id"
-      pure GenerateOk{ msg_id, in_reply_to, id }
+  deriving stock (Generic, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON "generate_ok" '[] GenerateOk
 
 main :: IO ()
 main = do
