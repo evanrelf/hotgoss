@@ -53,12 +53,17 @@ send message = do
   liftIO $ LByteString.hPut stdout bytes
   hFlush stdout
 
-receive :: (FromJSON a, MonadIO m) => m (Message a)
+receive
+  :: (HasCallStack, FromJSON a, MonadIO m)
+  => m (Message a)
 receive = do
   bytes <- encodeUtf8 <$> getLine
   either Exception.throwString pure $ eitherDecode' bytes
 
-handle :: (FromJSON a, ToJSON b, MonadIO m) => (a -> m b) -> m ()
+handle
+  :: (HasCallStack, FromJSON a, ToJSON b, MonadIO m)
+  => (a -> m b)
+  -> m ()
 handle k = do
   message <- receive
   body <- k message.body
@@ -68,7 +73,7 @@ handle k = do
     , body
     }
 
-handleInit :: MonadIO m => m Text
+handleInit :: (HasCallStack, MonadIO m) => m Text
 handleInit = do
   message <- receive @Init
   send @InitOk Message
