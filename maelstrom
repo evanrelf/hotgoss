@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+IFS=$'\n\t'
+
+result=$(nix build --file maelstrom.nix --no-link --print-out-paths)
+
+args=()
+
+bin=false
+
+for arg in "$@"; do
+  if [ "$bin" = true ]; then
+    args+=("$(cabal list-bin "$arg")")
+    bin=false
+    continue
+  fi
+
+  if [ "$arg" = "--bin" ]; then
+    bin=true
+  fi
+
+  args+=("$arg")
+done
+
+exec "$result/bin/maelstrom" "${args[@]}"
