@@ -49,13 +49,16 @@ library
   exposed-modules:
     HotGoss
     HotGoss.Challenge1
+    HotGoss.Challenge2
     HotGoss.Protocol
     HotGoss.Union
 
 executable hotgoss-1
-  import:
-    , common
-    , executable
+  import: common, executable
   main-is: src/Main.hs
-  build-depends:
-    , hotgoss
+  build-depends: hotgoss
+
+executable hotgoss-2
+  import: common, executable
+  main-is: src/Main.hs
+  build-depends: hotgoss
