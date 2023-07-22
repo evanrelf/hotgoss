@@ -5,7 +5,7 @@ import Data.Aeson.Types (Parser)
 import HotGoss.Protocol
 
 data Echo = Echo
-  { messageId :: Word
+  { msg_id :: Word
   , echo :: Text
   }
   deriving stock (Show)
@@ -15,7 +15,7 @@ instance ToJSON Echo where
   toJSON body =
     object
       [ "type" .= ("echo" :: Text)
-      , "msg_id" .= body.messageId
+      , "msg_id" .= body.msg_id
       , "echo" .= body.echo
       ]
 
@@ -25,13 +25,13 @@ instance FromJSON Echo where
     withObject "Echo" \o -> do
       type_ :: Text <- o .: "type"
       guard (type_ == "echo")
-      messageId <- o .: "msg_id"
+      msg_id <- o .: "msg_id"
       echo <- o .: "echo"
-      pure Echo{ messageId, echo }
+      pure Echo{ msg_id, echo }
 
 data EchoOk = EchoOk
-  { messageId :: Word
-  , inReplyTo :: Word
+  { msg_id :: Word
+  , in_reply_to :: Word
   , echo :: Text
   }
   deriving stock (Show)
@@ -41,8 +41,8 @@ instance ToJSON EchoOk where
   toJSON body =
     object
       [ "type" .= ("echo_ok" :: Text)
-      , "msg_id" .= body.messageId
-      , "in_reply_to" .= body.inReplyTo
+      , "msg_id" .= body.msg_id
+      , "in_reply_to" .= body.in_reply_to
       , "echo" .= body.echo
       ]
 
@@ -52,23 +52,23 @@ instance FromJSON EchoOk where
     withObject "EchoOk" \o -> do
       type_ :: Text <- o .: "type"
       guard (type_ == "echo_ok")
-      messageId <- o .: "msg_id"
-      inReplyTo <- o .: "in_reply_to"
+      msg_id <- o .: "msg_id"
+      in_reply_to <- o .: "in_reply_to"
       echo <- o .: "echo"
-      pure EchoOk{ messageId, inReplyTo, echo }
+      pure EchoOk{ msg_id, in_reply_to, echo }
 
 main :: IO ()
 main = do
-  getMessageId <- do
+  getMsgId <- do
     ref <- newIORef 1
-    pure $ atomicModifyIORef' ref \mid -> (mid + 1, mid)
+    pure $ atomicModifyIORef' ref \x -> (x + 1, x)
 
   _ <- handleInit
 
   forever $ handle @Echo \body -> do
-    messageId <- getMessageId
+    msg_id <- getMsgId
     pure EchoOk
-      { messageId
-      , inReplyTo = body.messageId
+      { msg_id
+      , in_reply_to = body.msg_id
       , echo = body.echo
       }

@@ -6,7 +6,7 @@ import HotGoss.Protocol
 import Prelude hiding (id)
 
 data Generate = Generate
-  { messageId :: Word
+  { msg_id :: Word
   }
   deriving stock (Show)
 
@@ -15,7 +15,7 @@ instance ToJSON Generate where
   toJSON body =
     object
       [ "type" .= ("generate" :: Text)
-      , "msg_id" .= body.messageId
+      , "msg_id" .= body.msg_id
       ]
 
 instance FromJSON Generate where
@@ -24,12 +24,12 @@ instance FromJSON Generate where
     withObject "Generate" \o -> do
       type_ :: Text <- o .: "type"
       guard (type_ == "generate")
-      messageId <- o .: "msg_id"
-      pure Generate{ messageId }
+      msg_id <- o .: "msg_id"
+      pure Generate{ msg_id }
 
 data GenerateOk = GenerateOk
-  { messageId :: Word
-  , inReplyTo :: Word
+  { msg_id :: Word
+  , in_reply_to :: Word
   , id :: Text
   }
   deriving stock (Show)
@@ -39,7 +39,7 @@ instance ToJSON GenerateOk where
   toJSON body =
     object
       [ "type" .= ("generate_ok" :: Text)
-      , "in_reply_to" .= body.inReplyTo
+      , "in_reply_to" .= body.in_reply_to
       , "id" .= body.id
       ]
 
@@ -49,23 +49,23 @@ instance FromJSON GenerateOk where
     withObject "GenerateOk" \o -> do
       type_ :: Text <- o .: "type"
       guard (type_ == "generate_ok")
-      messageId <- o .: "msg_id"
-      inReplyTo <- o .: "inReplyTo"
+      msg_id <- o .: "msg_id"
+      in_reply_to <- o .: "inReplyTo"
       id <- o .: "id"
-      pure GenerateOk{ messageId, inReplyTo, id }
+      pure GenerateOk{ msg_id, in_reply_to, id }
 
 main :: IO ()
 main = do
-  getMessageId <- do
+  getMsgId <- do
     ref <- newIORef 1
     pure $ atomicModifyIORef' ref \mid -> (mid + 1, mid)
 
   nodeId <- handleInit
 
   forever $ handle @Generate \generate -> do
-    messageId <- getMessageId
+    msg_id <- getMsgId
     pure GenerateOk
-      { messageId
-      , inReplyTo = generate.messageId
-      , id = nodeId <> "-" <> show messageId
+      { msg_id
+      , in_reply_to = generate.msg_id
+      , id = nodeId <> "-" <> show msg_id
       }

@@ -23,8 +23,8 @@ import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
 data Message a = Message
-  { source :: Text
-  , destination :: Text
+  { src :: Text
+  , dest :: Text
   , body :: a
   }
   deriving stock (Show)
@@ -33,8 +33,8 @@ instance ToJSON a => ToJSON (Message a) where
   toJSON :: Message a -> Value
   toJSON message =
     object
-      [ "src" .= message.source
-      , "dest" .= message.destination
+      [ "src" .= message.src
+      , "dest" .= message.dest
       , "body" .= message.body
       ]
 
@@ -42,10 +42,10 @@ instance FromJSON a => FromJSON (Message a) where
   parseJSON :: Value -> Parser (Message a)
   parseJSON =
     withObject "Message" \o -> do
-      source <- o .: "src"
-      destination <- o .: "dest"
+      src <- o .: "src"
+      dest <- o .: "dest"
       body <- o .: "body"
-      pure Message{ source, destination, body }
+      pure Message{ src, dest, body }
 
 send :: (ToJSON a, MonadIO m) => Message a -> m ()
 send message = do
@@ -63,8 +63,8 @@ handle k = do
   message <- receive
   body <- k message.body
   send Message
-    { source = message.destination
-    , destination = message.source
+    { src = message.dest
+    , dest = message.src
     , body
     }
 
@@ -72,14 +72,14 @@ handleInit :: MonadIO m => m Text
 handleInit = do
   message <- receive @Init
   send @InitOk Message
-    { source = message.destination
-    , destination = message.source
+    { src = message.dest
+    , dest = message.src
     , body =
         InitOk
-          { inReplyTo = message.body.messageId
+          { in_reply_to = message.body.msg_id
           }
     }
-  pure message.destination
+  pure message.dest
 
 log :: MonadIO m => Text -> m ()
 log message = do
@@ -87,9 +87,9 @@ log message = do
   hFlush stdout
 
 data Init = Init
-  { messageId :: Word
-  , nodeId :: Text
-  , nodeIds :: [Text]
+  { msg_id :: Word
+  , node_id :: Text
+  , node_ids :: [Text]
   }
   deriving stock (Show)
 
@@ -98,9 +98,9 @@ instance ToJSON Init where
   toJSON body =
     object
       [ "type" .= ("init" :: Text)
-      , "msg_id" .= body.messageId
-      , "node_id" .= body.nodeId
-      , "node_ids" .= body.nodeIds
+      , "msg_id" .= body.msg_id
+      , "node_id" .= body.node_id
+      , "node_ids" .= body.node_ids
       ]
 
 instance FromJSON Init where
@@ -109,13 +109,13 @@ instance FromJSON Init where
     withObject "Init" \o -> do
       type_ :: Text <- o .: "type"
       guard (type_ == "init")
-      messageId <- o .: "msg_id"
-      nodeId <- o .: "node_id"
-      nodeIds <- o .: "node_ids"
-      pure Init{ messageId, nodeId, nodeIds }
+      msg_id <- o .: "msg_id"
+      node_id <- o .: "node_id"
+      node_ids <- o .: "node_ids"
+      pure Init{ msg_id, node_id, node_ids }
 
 data InitOk = InitOk
-  { inReplyTo :: Word
+  { in_reply_to :: Word
   }
   deriving stock (Show)
 
@@ -124,7 +124,7 @@ instance ToJSON InitOk where
   toJSON body =
     object
       [ "type" .= ("init_ok" :: Text)
-      , "in_reply_to" .= body.inReplyTo
+      , "in_reply_to" .= body.in_reply_to
       ]
 
 instance FromJSON InitOk where
@@ -133,11 +133,11 @@ instance FromJSON InitOk where
     withObject "InitOk" \o -> do
       type_ :: Text <- o .: "type"
       guard (type_ == "init_ok")
-      inReplyTo <- o .: "in_reply_to"
-      pure InitOk{ inReplyTo }
+      in_reply_to <- o .: "in_reply_to"
+      pure InitOk{ in_reply_to }
 
 data Error = Error
-  { inReplyTo :: Word
+  { in_reply_to :: Word
   , code :: ErrorCode
   , text :: Maybe Text
     -- TODO: Can include other arbitrary fields
@@ -149,7 +149,7 @@ instance ToJSON Error where
   toJSON body =
     object
       [ "type" .= ("error" :: Text)
-      , "in_reply_to" .= body.inReplyTo
+      , "in_reply_to" .= body.in_reply_to
       , "code" .= fromErrorCode body.code
         -- TODO: Omit `text` when `Nothing`
       , "text" .= body.text
@@ -161,10 +161,10 @@ instance FromJSON Error where
     withObject "Error" \o -> do
       type_ :: Text <- o .: "type"
       guard (type_ == "error")
-      inReplyTo <- o .: "in_reply_to"
+      in_reply_to <- o .: "in_reply_to"
       code <- toErrorCode <$> o .: "code"
       text <- o .:? "text"
-      pure Error{ inReplyTo, code, text }
+      pure Error{ in_reply_to, code, text }
 
 data ErrorCode
   = Timeout
