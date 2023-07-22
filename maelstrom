@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 IFS=$'\n\t'
 
-result=$(nix build --file maelstrom.nix --no-link --print-out-paths)
+: "${maelstrom:=$(nix build --file maelstrom.nix --no-link --print-out-paths)}"
 
 args=()
 
@@ -23,4 +23,4 @@ for arg in "$@"; do
   args+=("$arg")
 done
 
-exec "$result/bin/maelstrom" "${args[@]}"
+exec "$maelstrom/bin/maelstrom" "${args[@]}"

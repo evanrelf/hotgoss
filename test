@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+IFS=$'\n\t'
+
+cabal build
+
+maelstrom=$(nix build --file maelstrom.nix --no-link --print-out-paths)
+export maelstrom
+
+./maelstrom test -w echo --bin hotgoss-1 --node-count 1 --time-limit 10
+
+./maelstrom test -w unique-ids --bin hotgoss-2 --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
