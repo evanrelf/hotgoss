@@ -59,9 +59,10 @@ instance FromJSON EchoOk where
 
 main :: IO ()
 main = do
-  messageIdRef <- newIORef 1
+  getMessageId <- do
+    ref <- newIORef 1
+    pure $ atomicModifyIORef' ref \mid -> (mid + 1, mid)
 
-  let getMessageId = atomicModifyIORef' messageIdRef \mid -> (mid + 1, mid)
 
   handle @Init \body -> do
     pure InitOk
