@@ -3,6 +3,7 @@ module HotGoss.Protocol
   , send
   , receive
   , handle
+  , handleInit
   , log
   , Init (..)
   , InitOk (..)
@@ -61,11 +62,24 @@ handle :: (FromJSON a, ToJSON b, MonadIO m) => (a -> m b) -> m ()
 handle k = do
   message <- receive
   body <- k message.body
-  send message
+  send Message
     { source = message.destination
     , destination = message.source
     , body
     }
+
+handleInit :: MonadIO m => m Text
+handleInit = do
+  message <- receive @Init
+  send @InitOk Message
+    { source = message.destination
+    , destination = message.source
+    , body =
+        InitOk
+          { inReplyTo = message.body.messageId
+          }
+    }
+  pure message.destination
 
 log :: MonadIO m => Text -> m ()
 log message = do

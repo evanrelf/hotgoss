@@ -63,11 +63,7 @@ main = do
     ref <- newIORef 1
     pure $ atomicModifyIORef' ref \mid -> (mid + 1, mid)
 
-
-  handle @Init \body -> do
-    pure InitOk
-      { inReplyTo = body.messageId
-      }
+  _ <- handleInit
 
   forever $ handle @Echo \body -> do
     messageId <- getMessageId
