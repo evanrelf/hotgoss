@@ -3,7 +3,6 @@ module HotGoss.Challenge1 (main) where
 import Data.Aeson
 import Data.Aeson.Types (Parser)
 import HotGoss.Protocol
-import Prelude hiding (init)
 
 data Echo = Echo
   { messageId :: Word
@@ -13,11 +12,11 @@ data Echo = Echo
 
 instance ToJSON Echo where
   toJSON :: Echo -> Value
-  toJSON echo =
+  toJSON body =
     object
       [ "type" .= ("echo" :: Text)
-      , "msg_id" .= echo.messageId
-      , "echo" .= echo.echo
+      , "msg_id" .= body.messageId
+      , "echo" .= body.echo
       ]
 
 instance FromJSON Echo where
@@ -39,12 +38,12 @@ data EchoOk = EchoOk
 
 instance ToJSON EchoOk where
   toJSON :: EchoOk -> Value
-  toJSON echoOk =
+  toJSON body =
     object
       [ "type" .= ("echo_ok" :: Text)
-      , "msg_id" .= echoOk.messageId
-      , "in_reply_to" .= echoOk.inReplyTo
-      , "echo" .= echoOk.echo
+      , "msg_id" .= body.messageId
+      , "in_reply_to" .= body.inReplyTo
+      , "echo" .= body.echo
       ]
 
 instance FromJSON EchoOk where
@@ -64,15 +63,15 @@ main = do
 
   let getMessageId = atomicModifyIORef' messageIdRef \mid -> (mid + 1, mid)
 
-  handle @Init \init -> do
+  handle @Init \body -> do
     pure InitOk
-      { inReplyTo = init.messageId
+      { inReplyTo = body.messageId
       }
 
-  forever $ handle @Echo \echo -> do
+  forever $ handle @Echo \body -> do
     messageId <- getMessageId
     pure EchoOk
       { messageId
-      , inReplyTo = echo.messageId
-      , echo = echo.echo
+      , inReplyTo = body.messageId
+      , echo = body.echo
       }

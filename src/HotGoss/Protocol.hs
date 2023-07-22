@@ -81,12 +81,12 @@ data Init = Init
 
 instance ToJSON Init where
   toJSON :: Init -> Value
-  toJSON init =
+  toJSON body =
     object
       [ "type" .= ("init" :: Text)
-      , "msg_id" .= init.messageId
-      , "node_id" .= init.nodeId
-      , "node_ids" .= init.nodeIds
+      , "msg_id" .= body.messageId
+      , "node_id" .= body.nodeId
+      , "node_ids" .= body.nodeIds
       ]
 
 instance FromJSON Init where
@@ -107,10 +107,10 @@ data InitOk = InitOk
 
 instance ToJSON InitOk where
   toJSON :: InitOk -> Value
-  toJSON initOk =
+  toJSON body =
     object
       [ "type" .= ("init_ok" :: Text)
-      , "in_reply_to" .= initOk.inReplyTo
+      , "in_reply_to" .= body.inReplyTo
       ]
 
 instance FromJSON InitOk where
@@ -132,13 +132,13 @@ data Error = Error
 
 instance ToJSON Error where
   toJSON :: Error -> Value
-  toJSON error =
+  toJSON body =
     object
       [ "type" .= ("error" :: Text)
-      , "in_reply_to" .= error.inReplyTo
-      , "code" .= fromErrorCode error.code
+      , "in_reply_to" .= body.inReplyTo
+      , "code" .= fromErrorCode body.code
         -- TODO: Omit `text` when `Nothing`
-      , "text" .= error.text
+      , "text" .= body.text
       ]
 
 instance FromJSON Error where
