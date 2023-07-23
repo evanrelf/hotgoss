@@ -24,6 +24,7 @@ common common
     PatternSynonyms
     TypeFamilies
     UndecidableInstances
+    ViewPatterns
   ghc-options:
     -Wall
     -Wcompat
