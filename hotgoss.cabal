@@ -60,6 +60,7 @@ library
     HotGoss.Challenge3a
     HotGoss.Challenge3b
     HotGoss.ErrorCode
+    HotGoss.Indexed
     HotGoss.Protocol
     HotGoss.Union
 
