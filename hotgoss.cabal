@@ -63,22 +63,7 @@ library
     HotGoss.Protocol
     HotGoss.Union
 
-executable hotgoss-1
-  import: common, executable
-  main-is: src/Main.hs
-  build-depends: hotgoss
-
-executable hotgoss-2
-  import: common, executable
-  main-is: src/Main.hs
-  build-depends: hotgoss
-
-executable hotgoss-3a
-  import: common, executable
-  main-is: src/Main.hs
-  build-depends: hotgoss
-
-executable hotgoss-3b
+executable hotgoss
   import: common, executable
   main-is: src/Main.hs
   build-depends: hotgoss

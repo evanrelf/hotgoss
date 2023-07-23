@@ -3,23 +3,45 @@
 set -Eeuo pipefail
 IFS=$'\n\t'
 
+echo "Building hotgoss"
 cabal build
+hotgoss=$(cabal list-bin hotgoss)
 
+echo "Building maelstrom"
 maelstrom=$(nix build --file maelstrom.nix --no-link --print-out-paths)
-export maelstrom
+
+maelstrom() {
+  args=()
+  bin=false
+  for arg in "$@"; do
+    if [ "$bin" = true ]; then
+      temp=$(mktemp)
+      echo -e "#!/usr/bin/env bash\nexec -a '$arg' '$hotgoss'" '"$@"' > "$temp"
+      chmod +x "$temp"
+      args+=("$temp")
+      bin=false
+      continue
+    fi
+    if [ "$arg" = "--bin" ]; then
+      bin=true
+    fi
+    args+=("$arg")
+  done
+  "$maelstrom/bin/maelstrom" "${args[@]}"
+}
 
 test=${1:-}
-
 when() {
   if [ -z "$test" ] || [ "$test" = "$1" ]; then
-    (set -x; "${@:2}")
+    echo "+" "${@:2}"
+    "${@:2}"
   fi
 }
 
-when 1 ./maelstrom test -w echo --bin hotgoss-1 --node-count 1 --time-limit 10
+when 1 maelstrom test -w echo --bin hotgoss-1 --node-count 1 --time-limit 10
 
-when 2 ./maelstrom test -w unique-ids --bin hotgoss-2 --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
+when 2 maelstrom test -w unique-ids --bin hotgoss-2 --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
 
-when 3a ./maelstrom test -w broadcast --bin hotgoss-3a --node-count 1 --time-limit 20 --rate 10
+when 3a maelstrom test -w broadcast --bin hotgoss-3a --node-count 1 --time-limit 20 --rate 10
 
-when 3b ./maelstrom test -w broadcast --bin hotgoss-3b --node-count 5 --time-limit 20 --rate 10
+when 3b maelstrom test -w broadcast --bin hotgoss-3b --node-count 5 --time-limit 20 --rate 10
