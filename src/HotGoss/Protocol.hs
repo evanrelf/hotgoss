@@ -5,7 +5,9 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 module HotGoss.Protocol
-  ( Message (..)
+  ( NodeId (..)
+  , MessageId (..)
+  , Message (..)
   , MessageJSON (..)
   , CustomJSON (..)
   , Omitted
@@ -34,9 +36,17 @@ import qualified Data.Data as Data
 import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
+newtype NodeId = NodeId Text
+  deriving stock (Generic, Data, Show)
+  deriving newtype (IsString, ToString, ToText, ToJSON, FromJSON)
+
+newtype MessageId = MessageId Word
+  deriving stock (Generic, Data, Show)
+  deriving newtype (Num, ToJSON, FromJSON)
+
 data Message a = Message
-  { src :: Text
-  , dest :: Text
+  { src :: NodeId
+  , dest :: NodeId
   , body :: a
   }
   deriving stock (Generic, Show)
@@ -122,7 +132,7 @@ handle k = do
     , body
     }
 
-handleInit :: (HasCallStack, MonadIO m) => m Text
+handleInit :: (HasCallStack, MonadIO m) => m NodeId
 handleInit = do
   message <- receive @Init
   send @InitOk Message
@@ -142,23 +152,23 @@ log message = do
   hFlush stdout
 
 data Init = Init
-  { msgId :: Word
+  { msgId :: MessageId
   , inReplyTo :: Omitted
-  , nodeId :: Text
-  , nodeIds :: [Text]
+  , nodeId :: NodeId
+  , nodeIds :: [NodeId]
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON Init
 
 data InitOk = InitOk
   { msgId :: Omitted
-  , inReplyTo :: Word
+  , inReplyTo :: MessageId
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON InitOk
 
 data Error = Error
-  { inReplyTo :: Word
+  { inReplyTo :: MessageId
   , code :: ErrorCode
   , text :: Maybe Text
     -- TODO: Can include other arbitrary fields

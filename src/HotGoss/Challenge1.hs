@@ -5,7 +5,7 @@ import Data.Data (Data)
 import HotGoss.Protocol
 
 data Echo = Echo
-  { msgId :: Word
+  { msgId :: MessageId
   , inReplyTo :: Omitted
   , echo :: Text
   }
@@ -13,8 +13,8 @@ data Echo = Echo
   deriving (ToJSON, FromJSON) via MessageJSON Echo
 
 data EchoOk = EchoOk
-  { msgId :: Word
-  , inReplyTo :: Word
+  { msgId :: MessageId
+  , inReplyTo :: MessageId
   , echo :: Text
   }
   deriving stock (Generic, Data, Show)

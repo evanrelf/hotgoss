@@ -7,7 +7,7 @@ import HotGoss.Union
 import Prelude hiding (Read)
 
 data Broadcast = Broadcast
-  { msgId :: Word
+  { msgId :: MessageId
   , inReplyTo :: Omitted
   , message :: Word
   }
@@ -15,29 +15,29 @@ data Broadcast = Broadcast
   deriving (ToJSON, FromJSON) via MessageJSON Broadcast
 
 data BroadcastOk = BroadcastOk
-  { msgId :: Word
-  , inReplyTo :: Word
+  { msgId :: MessageId
+  , inReplyTo :: MessageId
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON BroadcastOk
 
 data Read = Read
-  { msgId :: Word
+  { msgId :: MessageId
   , inReplyTo :: Omitted
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON Read
 
 data ReadOk = ReadOk
-  { msgId :: Word
-  , inReplyTo :: Word
+  { msgId :: MessageId
+  , inReplyTo :: MessageId
   , messages :: [Word]
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON ReadOk
 
 data Topology = Topology
-  { msgId :: Word
+  { msgId :: MessageId
   , inReplyTo :: Omitted
   , topology :: HashMap Text [Text]
   }
@@ -45,8 +45,8 @@ data Topology = Topology
   deriving (ToJSON, FromJSON) via MessageJSON Topology
 
 data TopologyOk = TopologyOk
-  { msgId :: Word
-  , inReplyTo :: Word
+  { msgId :: MessageId
+  , inReplyTo :: MessageId
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON TopologyOk
