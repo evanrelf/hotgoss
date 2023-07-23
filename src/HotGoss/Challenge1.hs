@@ -22,11 +22,7 @@ data EchoOk = EchoOk
 
 main :: IO ()
 main = do
-  getMsgId <- do
-    ref <- newIORef 1
-    pure $ atomicModifyIORef' ref \x -> (x + 1, x)
-
-  _ <- handleInit
+  (getMsgId, _, _) <- handleInit
 
   forever $ handle @Echo \body -> do
     msgId <- getMsgId

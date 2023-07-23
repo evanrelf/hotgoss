@@ -55,11 +55,7 @@ main :: IO ()
 main = do
   messagesRef <- newIORef []
 
-  getMsgId <- do
-    ref <- newIORef 1
-    pure $ atomicModifyIORef' ref \x -> (x + 1, x)
-
-  _ <- handleInit
+  (getMsgId, _, _) <- handleInit
 
   handle @Topology \body -> do
     -- TODO: body.topology

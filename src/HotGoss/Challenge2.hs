@@ -22,11 +22,7 @@ data GenerateOk = GenerateOk
 
 main :: IO ()
 main = do
-  getMsgId <- do
-    ref <- newIORef 1
-    pure $ atomicModifyIORef' ref \x -> (x + 1, x)
-
-  nodeId <- handleInit
+  (getMsgId, nodeId, _) <- handleInit
 
   forever $ handle @Generate \body -> do
     msgId <- getMsgId

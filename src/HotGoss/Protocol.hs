@@ -7,6 +7,7 @@ module HotGoss.Protocol
   , MessageJSON (..)
   , CustomJSON (..)
   , Omitted
+  , pattern Omitted
   , send
   , receive
   , handle
@@ -116,31 +117,41 @@ receive = do
   either Exception.throwString pure $ eitherDecode' bytes
 
 handle
-  :: (HasCallStack, IsMessage a, IsMessage b, FromJSON a, ToJSON b, MonadIO m)
-  => (a -> m b)
+  :: ( HasCallStack
+     , IsMessage req
+     , IsMessage res
+     , FromJSON req
+     , ToJSON res
+     , MonadIO m
+     )
+  => (req -> m res)
   -> m ()
 handle k = do
-  message <- receive
-  body <- k message.body
+  req <- receive
+  body <- k req.body
   send Message
-    { src = message.dest
-    , dest = message.src
+    { src = req.dest
+    , dest = req.src
     , body
     }
 
-handleInit :: (HasCallStack, MonadIO m) => m NodeId
+handleInit :: (HasCallStack, MonadIO m) => m (m MessageId, NodeId, [NodeId])
 handleInit = do
-  message <- receive @Init
+  getMsgId <- do
+    ref <- newIORef 1
+    pure $ atomicModifyIORef' ref \x -> (x + 1, x)
+  msgId <- getMsgId
+  req <- receive @Init
   send @InitOk Message
-    { src = message.dest
-    , dest = message.src
+    { src = req.dest
+    , dest = req.src
     , body =
         InitOk
-          { msgId = Omitted
-          , inReplyTo = message.body.msgId
+          { msgId
+          , inReplyTo = req.body.msgId
           }
     }
-  pure message.dest
+  pure (getMsgId, req.body.nodeId, req.body.nodeIds)
 
 log :: MonadIO m => Text -> m ()
 log message = do
@@ -157,7 +168,7 @@ data Init = Init
   deriving (ToJSON, FromJSON) via MessageJSON Init
 
 data InitOk = InitOk
-  { msgId :: Omitted
+  { msgId :: MessageId
   , inReplyTo :: MessageId
   }
   deriving stock (Generic, Data, Show)
