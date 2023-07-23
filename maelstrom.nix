@@ -1,7 +1,5 @@
-let
-  pkgs = import <nixpkgs> { };
+{ pkgs ? import <nixpkgs> { } }:
 
-in
 pkgs.stdenv.mkDerivation {
   pname = "maelstrom";
   version = "0.2.3";
