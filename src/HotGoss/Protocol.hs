@@ -12,9 +12,6 @@ module HotGoss.Protocol
   , Init (..)
   , InitOk (..)
   , Error (..)
-  , ErrorCode (..)
-  , toErrorCode
-  , fromErrorCode
   )
 where
 
@@ -23,6 +20,7 @@ import Data.Aeson.Types (Parser)
 import Deriving.Aeson
 import GHC.Generics (Rep)
 import GHC.TypeLits (KnownSymbol, symbolVal)
+import HotGoss.ErrorCode (ErrorCode)
 import Prelude hiding (error, init)
 
 import qualified Data.Aeson.KeyMap as KeyMap
@@ -138,56 +136,3 @@ data Error = Error
   }
   deriving stock (Generic, Show)
   deriving (ToJSON, FromJSON) via MessageJSON "error" '[] Error
-
-data ErrorCode
-  = Timeout
-  | NodeNotFound
-  | NotSupported
-  | TemporarilyUnavailable
-  | MalformedRequest
-  | Crash
-  | Abort
-  | KeyDoesNotExist
-  | KeyAlreadyExists
-  | PreconditionFailed
-  | TransactionConflict
-  | Unknown Word
-  deriving stock (Show)
-
-instance ToJSON ErrorCode where
-  toJSON :: ErrorCode -> Value
-  toJSON = toJSON . fromErrorCode
-
-instance FromJSON ErrorCode where
-  parseJSON :: Value -> Parser ErrorCode
-  parseJSON = fmap toErrorCode . parseJSON
-
-toErrorCode :: Word -> ErrorCode
-toErrorCode = \case
-  0 -> Timeout
-  1 -> NodeNotFound
-  10 -> NotSupported
-  11 -> TemporarilyUnavailable
-  12 -> MalformedRequest
-  13 -> Crash
-  14 -> Abort
-  20 -> KeyDoesNotExist
-  21 -> KeyAlreadyExists
-  22 -> PreconditionFailed
-  30 -> TransactionConflict
-  n -> Unknown n
-
-fromErrorCode :: ErrorCode -> Word
-fromErrorCode = \case
-  Timeout -> 0
-  NodeNotFound -> 1
-  NotSupported -> 10
-  TemporarilyUnavailable -> 11
-  MalformedRequest -> 12
-  Crash -> 13
-  Abort -> 14
-  KeyDoesNotExist -> 20
-  KeyAlreadyExists -> 21
-  PreconditionFailed -> 22
-  TransactionConflict -> 30
-  Unknown n -> n

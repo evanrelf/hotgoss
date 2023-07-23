@@ -54,6 +54,7 @@ library
     HotGoss.Challenge1
     HotGoss.Challenge2
     HotGoss.Challenge3a
+    HotGoss.ErrorCode
     HotGoss.Protocol
     HotGoss.Union
 
