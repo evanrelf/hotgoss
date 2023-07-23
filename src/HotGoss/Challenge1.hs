@@ -24,7 +24,7 @@ main :: IO ()
 main = do
   (getMessageId, _, _) <- handleInit
 
-  forever $ handle @Echo \body -> do
+  forever $ handle_ @Echo \body -> do
     msgId <- getMessageId
     pure EchoOk
       { msgId

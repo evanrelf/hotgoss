@@ -11,6 +11,7 @@ module HotGoss.Protocol
   , send
   , receive
   , handle
+  , handle_
   , handleInit
   , log
   , Init (..)
@@ -124,16 +125,29 @@ handle
      , ToJSON res
      , MonadIO m
      )
-  => (req -> m res)
-  -> m ()
+  => (req -> m (res, a))
+  -> m a
 handle k = do
   req <- receive
-  body <- k req.body
+  (body, x) <- k req.body
   send Message
     { src = req.dest
     , dest = req.src
     , body
     }
+  pure x
+
+handle_
+  :: ( HasCallStack
+     , IsMessage req
+     , IsMessage res
+     , FromJSON req
+     , ToJSON res
+     , MonadIO m
+     )
+  => (req -> m res)
+  -> m ()
+handle_ k = handle (fmap (, ()) . k)
 
 handleInit :: (HasCallStack, MonadIO m) => m (m MessageId, NodeId, [NodeId])
 handleInit = do
