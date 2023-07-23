@@ -1,22 +1,23 @@
 module HotGoss.Challenge2 (main) where
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.Data (Data)
 import HotGoss.Protocol
 import Prelude hiding (id)
 
 data Generate = Generate
   { msgId :: Word
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "generate" Generate
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON Generate
 
 data GenerateOk = GenerateOk
   { msgId :: Word
   , inReplyTo :: Word
   , id :: Text
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "generate_ok" GenerateOk
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON GenerateOk
 
 main :: IO ()
 main = do

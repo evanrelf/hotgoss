@@ -1,6 +1,7 @@
 module HotGoss.Challenge3a (main) where
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.Data (Data)
 import HotGoss.Protocol
 import HotGoss.Union
 import Prelude hiding (Read)
@@ -10,45 +11,45 @@ data Broadcast = Broadcast
   , inReplyTo :: Maybe Word
   , message :: Word
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "broadcast" Broadcast
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON Broadcast
 
 data BroadcastOk = BroadcastOk
   { msgId :: Maybe Word
   , inReplyTo :: Maybe Word
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "broadcast_ok" BroadcastOk
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON BroadcastOk
 
 data Read = Read
   { msgId :: Maybe Word
   , inReplyTo :: Maybe Word
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "read" Read
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON Read
 
 data ReadOk = ReadOk
   { msgId :: Maybe Word
   , inReplyTo :: Maybe Word
   , messages :: [Word]
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "read_ok" ReadOk
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON ReadOk
 
 data Topology = Topology
   { msgId :: Maybe Word
   , inReplyTo :: Maybe Word
   , topology :: HashMap Text [Text]
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "topology" Topology
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON Topology
 
 data TopologyOk = TopologyOk
   { msgId :: Maybe Word
   , inReplyTo :: Maybe Word
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "topology_ok" TopologyOk
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON TopologyOk
 
 main :: IO ()
 main = do

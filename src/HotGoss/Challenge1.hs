@@ -1,22 +1,23 @@
 module HotGoss.Challenge1 (main) where
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.Data (Data)
 import HotGoss.Protocol
 
 data Echo = Echo
   { msgId :: Word
   , echo :: Text
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "echo" Echo
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON Echo
 
 data EchoOk = EchoOk
   { msgId :: Word
   , inReplyTo :: Word
   , echo :: Text
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "echo_ok" EchoOk
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON EchoOk
 
 main :: IO ()
 main = do

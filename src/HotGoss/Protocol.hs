@@ -17,15 +17,15 @@ where
 
 import Data.Aeson hiding (Error)
 import Data.Aeson.Types (Parser)
-import Deriving.Aeson (CustomJSON (..))
+import Data.Data (Data)
+import Deriving.Aeson (CamelToSnake, CustomJSON (..), StringModifier (..))
 import Deriving.Aeson.Stock (Snake)
 import GHC.Generics (Rep)
-import GHC.TypeLits (KnownSymbol, symbolVal)
 import HotGoss.ErrorCode (ErrorCode)
-import Prelude hiding (error, init)
 
 import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.ByteString.Lazy as LByteString
+import qualified Data.Data as Data
 import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
@@ -37,30 +37,37 @@ data Message a = Message
   deriving stock (Generic, Show)
   deriving (ToJSON, FromJSON) via Snake (Message a)
 
-newtype MessageJSON t a = MkMessageJSON (Snake a)
+newtype MessageJSON a = MessageJSON (Snake a)
+
+messageType :: forall a s. (Data a, IsString s) => Proxy a -> s
+messageType _ =
+  Data.dataTypeOf @a (error "unreachable")
+  & Data.dataTypeName
+  & Data.tyconUQname
+  & getStringModifier @CamelToSnake
+  & fromString
 
 instance
-  ( KnownSymbol t
-  , Generic a
+  ( Generic a
+  , Data a
   , GToJSON Zero (Rep a)
   , GToEncoding Zero (Rep a)
-  ) => ToJSON (MessageJSON t a) where
-  toJSON :: MessageJSON t a -> Value
-  toJSON (MkMessageJSON x) =
+  ) => ToJSON (MessageJSON a) where
+  toJSON :: MessageJSON a -> Value
+  toJSON (MessageJSON x) =
     case toJSON x of
-      Object keyMap -> do
-        let type_ = fromString (symbolVal (Proxy @t))
-        Object $ KeyMap.insert "type" type_ keyMap
+      Object keyMap ->
+        Object $ KeyMap.insert "type" (messageType (Proxy @a)) keyMap
       other -> other
 
 instance
-  ( KnownSymbol t
-  , Generic a
+  ( Generic a
+  , Data a
   , GFromJSON Zero (Rep a)
-  ) => FromJSON (MessageJSON t a) where
-  parseJSON :: Value -> Parser (MessageJSON t a)
-  parseJSON v = MkMessageJSON <$> do
-    let expected = symbolVal (Proxy @t)
+  ) => FromJSON (MessageJSON a) where
+  parseJSON :: Value -> Parser (MessageJSON a)
+  parseJSON v = MessageJSON <$> do
+    let expected = messageType (Proxy @a)
 
     v & withObject expected \o -> do
       actual <- o .: "type"
@@ -118,14 +125,14 @@ data Init = Init
   , nodeId :: Text
   , nodeIds :: [Text]
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "init" Init
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON Init
 
 data InitOk = InitOk
   { inReplyTo :: Word
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "init_ok" InitOk
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON InitOk
 
 data Error = Error
   { inReplyTo :: Word
@@ -133,5 +140,5 @@ data Error = Error
   , text :: Maybe Text
     -- TODO: Can include other arbitrary fields
   }
-  deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "error" Error
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageJSON Error

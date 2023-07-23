@@ -5,6 +5,8 @@ module HotGoss.ErrorCode
   )
 where
 
+import Data.Data (Data)
+
 import qualified Data.Aeson as Aeson
 import qualified Data.Aeson.Types as Aeson (Parser)
 
@@ -21,7 +23,7 @@ data ErrorCode
   | PreconditionFailed
   | TransactionConflict
   | Unknown Word
-  deriving stock (Show)
+  deriving stock (Data, Show)
 
 instance Aeson.ToJSON ErrorCode where
   toJSON :: ErrorCode -> Aeson.Value
