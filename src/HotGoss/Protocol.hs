@@ -1,7 +1,3 @@
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE UndecidableInstances #-}
-
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 module HotGoss.Protocol

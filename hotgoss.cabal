@@ -21,6 +21,9 @@ common common
     LambdaCase
     OverloadedRecordDot
     OverloadedStrings
+    PatternSynonyms
+    TypeFamilies
+    UndecidableInstances
   ghc-options:
     -Wall
     -Wcompat
