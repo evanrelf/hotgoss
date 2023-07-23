@@ -8,8 +8,16 @@ cabal build
 maelstrom=$(nix build --file maelstrom.nix --no-link --print-out-paths)
 export maelstrom
 
-./maelstrom test -w echo --bin hotgoss-1 --node-count 1 --time-limit 10
+test=${1:-}
 
-./maelstrom test -w unique-ids --bin hotgoss-2 --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
+when() {
+  if [ -z "$test" ] || [ "$test" = "$1" ]; then
+    (set -x; "${@:2}")
+  fi
+}
 
-./maelstrom test -w broadcast --bin hotgoss-3a --node-count 1 --time-limit 20 --rate 10
+when 1 ./maelstrom test -w echo --bin hotgoss-1 --node-count 1 --time-limit 10
+
+when 2 ./maelstrom test -w unique-ids --bin hotgoss-2 --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
+
+when 3a ./maelstrom test -w broadcast --bin hotgoss-3a --node-count 1 --time-limit 20 --rate 10
