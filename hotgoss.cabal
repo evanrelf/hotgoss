@@ -53,6 +53,7 @@ library
     HotGoss
     HotGoss.Challenge1
     HotGoss.Challenge2
+    HotGoss.Challenge3a
     HotGoss.Protocol
     HotGoss.Union
 
@@ -62,6 +63,11 @@ executable hotgoss-1
   build-depends: hotgoss
 
 executable hotgoss-2
+  import: common, executable
+  main-is: src/Main.hs
+  build-depends: hotgoss
+
+executable hotgoss-3a
   import: common, executable
   main-is: src/Main.hs
   build-depends: hotgoss

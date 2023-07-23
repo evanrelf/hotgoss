@@ -22,7 +22,7 @@ main :: IO ()
 main = do
   getMsgId <- do
     ref <- newIORef 1
-    pure $ atomicModifyIORef' ref \mid -> (mid + 1, mid)
+    pure $ atomicModifyIORef' ref \x -> (x + 1, x)
 
   nodeId <- handleInit
 

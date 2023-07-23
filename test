@@ -11,3 +11,5 @@ export maelstrom
 ./maelstrom test -w echo --bin hotgoss-1 --node-count 1 --time-limit 10
 
 ./maelstrom test -w unique-ids --bin hotgoss-2 --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
+
+./maelstrom test -w broadcast --bin hotgoss-3a --node-count 1 --time-limit 20 --rate 10
