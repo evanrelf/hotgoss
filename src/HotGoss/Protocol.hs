@@ -35,8 +35,17 @@ import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
 newtype NodeId = NodeId Text
-  deriving stock (Generic, Data, Show)
-  deriving newtype (IsString, ToString, ToText, ToJSON, FromJSON)
+  deriving stock (Generic, Data, Show, Eq)
+  deriving newtype
+    ( IsString
+    , ToString
+    , ToText
+    , ToJSON
+    , ToJSONKey
+    , FromJSON
+    , FromJSONKey
+    , Hashable
+    )
 
 newtype MessageId = MessageId Word
   deriving stock (Generic, Data, Show)

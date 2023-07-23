@@ -39,7 +39,7 @@ data ReadOk = ReadOk
 data Topology = Topology
   { msgId :: MessageId
   , inReplyTo :: Omitted
-  , topology :: HashMap Text [Text]
+  , topology :: HashMap NodeId [NodeId]
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON Topology
