@@ -15,12 +15,15 @@ common common
   default-extensions:
     BlockArguments
     DataKinds
+    DeriveAnyClass
     DerivingStrategies
     DerivingVia
     DuplicateRecordFields
     LambdaCase
+    OverloadedLabels
     OverloadedRecordDot
     OverloadedStrings
+    UndecidableInstances
   ghc-options:
     -Wall
     -Wcompat
@@ -47,8 +50,13 @@ library
   build-depends:
     , aeson
     , deriving-aeson
+    , large-anon
+    , optics-core
+    , sop-core
     , text
     , unliftio
+  ghc-options:
+    -fplugin=Data.Record.Anon.Plugin
   exposed-modules:
     HotGoss
     HotGoss.Challenge1
@@ -56,6 +64,7 @@ library
     HotGoss.Challenge3a
     HotGoss.ErrorCode
     HotGoss.Protocol
+    HotGoss.Protocol2
     HotGoss.Union
 
 executable hotgoss-1
