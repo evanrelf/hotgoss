@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module HotGoss.Union
   ( Union (..)
@@ -13,6 +14,7 @@ where
 
 import Data.Aeson
 import Data.Aeson.Types (Parser)
+import GHC.Records (HasField (..))
 
 data Union (r :: [Type]) where
   Zero :: a -> Union (a : r)
@@ -61,11 +63,19 @@ extract = \case
   Zero a -> a
   Succ u -> case u of
 
+instance {-# OVERLAPPABLE #-} (HasField x r a, HasField x (Union rs) a)
+  => HasField x (Union (r : rs)) a where
+  getField = either (getField @x) (getField @x) . decompose
+
+instance HasField x r a => HasField x (Union '[r]) a where
+  getField = getField @x . extract
+
 instance ToJSON a => ToJSON (Union '[a]) where
   toJSON :: Union '[a] -> Value
   toJSON = toJSON . extract
 
-instance {-# OVERLAPPABLE #-} (ToJSON a, ToJSON (Union r)) => ToJSON (Union (a : r)) where
+instance {-# OVERLAPPABLE #-} (ToJSON a, ToJSON (Union r))
+  => ToJSON (Union (a : r)) where
   toJSON :: Union (a : r) -> Value
   toJSON = either toJSON toJSON . decompose
 
@@ -73,6 +83,7 @@ instance FromJSON a => FromJSON (Union '[a]) where
   parseJSON :: Value -> Parser (Union '[a])
   parseJSON v = Zero <$> parseJSON v
 
-instance {-# OVERLAPPABLE #-} (FromJSON a, FromJSON (Union r)) => FromJSON (Union (a : r)) where
+instance {-# OVERLAPPABLE #-} (FromJSON a, FromJSON (Union r))
+  => FromJSON (Union (a : r)) where
   parseJSON :: Value -> Parser (Union (a : r))
   parseJSON v = Zero <$> parseJSON v <|> Succ <$> parseJSON v

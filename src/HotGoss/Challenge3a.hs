@@ -7,46 +7,46 @@ import HotGoss.Union
 import Prelude hiding (Read)
 
 data Broadcast = Broadcast
-  { msgId :: Maybe Word
-  , inReplyTo :: Maybe Word
+  { msgId :: Word
+  , inReplyTo :: Omitted
   , message :: Word
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON Broadcast
 
 data BroadcastOk = BroadcastOk
-  { msgId :: Maybe Word
-  , inReplyTo :: Maybe Word
+  { msgId :: Word
+  , inReplyTo :: Word
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON BroadcastOk
 
 data Read = Read
-  { msgId :: Maybe Word
-  , inReplyTo :: Maybe Word
+  { msgId :: Word
+  , inReplyTo :: Omitted
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON Read
 
 data ReadOk = ReadOk
-  { msgId :: Maybe Word
-  , inReplyTo :: Maybe Word
+  { msgId :: Word
+  , inReplyTo :: Word
   , messages :: [Word]
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON ReadOk
 
 data Topology = Topology
-  { msgId :: Maybe Word
-  , inReplyTo :: Maybe Word
+  { msgId :: Word
+  , inReplyTo :: Omitted
   , topology :: HashMap Text [Text]
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON Topology
 
 data TopologyOk = TopologyOk
-  { msgId :: Maybe Word
-  , inReplyTo :: Maybe Word
+  { msgId :: Word
+  , inReplyTo :: Word
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON TopologyOk
@@ -57,7 +57,7 @@ main = do
 
   getMsgId <- do
     ref <- newIORef 1
-    pure $ atomicModifyIORef' ref \x -> (x + 1, Just x)
+    pure $ atomicModifyIORef' ref \x -> (x + 1, x)
 
   _ <- handleInit
 
