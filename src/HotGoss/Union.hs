@@ -15,8 +15,8 @@ import Data.Aeson
 import Data.Aeson.Types (Parser)
 
 data Union (r :: [Type]) where
-  This :: a -> Union (a : r)
-  Next :: Union r -> Union (any : r)
+  Zero :: a -> Union (a : r)
+  Succ :: Union r -> Union (any : r)
 
 deriving instance Show (Union '[])
 
@@ -28,21 +28,21 @@ class Member a r where
 
 instance Member a (a : r) where
   inject :: a -> Union (a : r)
-  inject = This
+  inject = Zero
 
   project :: Union (a : r) -> Maybe a
   project = \case
-    This x -> Just x
-    Next _ -> Nothing
+    Zero x -> Just x
+    Succ _ -> Nothing
 
 instance {-# OVERLAPPABLE #-} Member a r => Member a (any : r) where
   inject :: a -> Union (any : r)
-  inject = Next . inject
+  inject = Succ . inject
 
   project :: Union (any : r) -> Maybe a
   project = \case
-    This _ -> Nothing
-    Next u -> project u
+    Zero _ -> Nothing
+    Succ u -> project u
 
 type family Members as r :: Constraint where
   Members '[] r = ()
@@ -50,16 +50,16 @@ type family Members as r :: Constraint where
 
 decompose :: Union (a : r) -> Either (Union r) a
 decompose = \case
-  This a -> Right a
-  Next u -> Left u
+  Zero a -> Right a
+  Succ u -> Left u
 
 weaken :: Union r -> Union (any : r)
-weaken = Next
+weaken = Succ
 
 extract :: Union '[a] -> a
 extract = \case
-  This a -> a
-  Next u -> case u of
+  Zero a -> a
+  Succ u -> case u of
 
 instance ToJSON a => ToJSON (Union '[a]) where
   toJSON :: Union '[a] -> Value
@@ -71,8 +71,8 @@ instance {-# OVERLAPPABLE #-} (ToJSON a, ToJSON (Union r)) => ToJSON (Union (a :
 
 instance FromJSON a => FromJSON (Union '[a]) where
   parseJSON :: Value -> Parser (Union '[a])
-  parseJSON v = This <$> parseJSON v
+  parseJSON v = Zero <$> parseJSON v
 
 instance {-# OVERLAPPABLE #-} (FromJSON a, FromJSON (Union r)) => FromJSON (Union (a : r)) where
   parseJSON :: Value -> Parser (Union (a : r))
-  parseJSON v = This <$> parseJSON v <|> Next <$> parseJSON v
+  parseJSON v = Zero <$> parseJSON v <|> Succ <$> parseJSON v
