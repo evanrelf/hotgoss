@@ -4,6 +4,7 @@ import qualified Data.Text.IO as Text
 import qualified HotGoss.Challenge1
 import qualified HotGoss.Challenge2
 import qualified HotGoss.Challenge3a
+import qualified HotGoss.Challenge3b
 import qualified UnliftIO.Environment as Environment
 
 main :: IO ()
@@ -15,6 +16,8 @@ main = do
       HotGoss.Challenge2.main
     "hotgoss-3a" ->
       HotGoss.Challenge3a.main
+    "hotgoss-3b" ->
+      HotGoss.Challenge3b.main
     program -> do
       Text.hPutStrLn stderr $ "wtf does '" <> toText program <> "' mean"
       exitFailure
