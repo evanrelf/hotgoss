@@ -6,49 +6,49 @@ import HotGoss.Union
 import Prelude hiding (Read)
 
 data Broadcast = Broadcast
-  { msg_id :: Maybe Word
-  , in_reply_to :: Maybe Word
+  { msgId :: Maybe Word
+  , inReplyTo :: Maybe Word
   , message :: Word
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "broadcast" '[] Broadcast
+  deriving (ToJSON, FromJSON) via MessageJSON "broadcast" Broadcast
 
 data BroadcastOk = BroadcastOk
-  { msg_id :: Maybe Word
-  , in_reply_to :: Maybe Word
+  { msgId :: Maybe Word
+  , inReplyTo :: Maybe Word
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "broadcast_ok" '[] BroadcastOk
+  deriving (ToJSON, FromJSON) via MessageJSON "broadcast_ok" BroadcastOk
 
 data Read = Read
-  { msg_id :: Maybe Word
-  , in_reply_to :: Maybe Word
+  { msgId :: Maybe Word
+  , inReplyTo :: Maybe Word
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "read" '[] Read
+  deriving (ToJSON, FromJSON) via MessageJSON "read" Read
 
 data ReadOk = ReadOk
-  { msg_id :: Maybe Word
-  , in_reply_to :: Maybe Word
+  { msgId :: Maybe Word
+  , inReplyTo :: Maybe Word
   , messages :: [Word]
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "read_ok" '[] ReadOk
+  deriving (ToJSON, FromJSON) via MessageJSON "read_ok" ReadOk
 
 data Topology = Topology
-  { msg_id :: Maybe Word
-  , in_reply_to :: Maybe Word
+  { msgId :: Maybe Word
+  , inReplyTo :: Maybe Word
   , topology :: HashMap Text [Text]
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "topology" '[] Topology
+  deriving (ToJSON, FromJSON) via MessageJSON "topology" Topology
 
 data TopologyOk = TopologyOk
-  { msg_id :: Maybe Word
-  , in_reply_to :: Maybe Word
+  { msgId :: Maybe Word
+  , inReplyTo :: Maybe Word
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "topology_ok" '[] TopologyOk
+  deriving (ToJSON, FromJSON) via MessageJSON "topology_ok" TopologyOk
 
 main :: IO ()
 main = do
@@ -62,30 +62,30 @@ main = do
 
   let handleBroadcast :: Broadcast -> IO BroadcastOk
       handleBroadcast body = do
-        msg_id <- getMsgId
+        msgId <- getMsgId
         atomicModifyIORef' messagesRef \ms -> (body.message : ms, ())
         pure BroadcastOk
-          { msg_id
-          , in_reply_to = body.msg_id
+          { msgId
+          , inReplyTo = body.msgId
           }
 
   let handleRead :: Read -> IO ReadOk
       handleRead body = do
-        msg_id <- getMsgId
+        msgId <- getMsgId
         messages <- readIORef messagesRef
         pure ReadOk
-          { msg_id
-          , in_reply_to = body.msg_id
+          { msgId
+          , inReplyTo = body.msgId
           , messages
           }
 
   let handleTopology :: Topology -> IO TopologyOk
       handleTopology body = do
         -- TODO: body.topology
-        msg_id <- getMsgId
+        msgId <- getMsgId
         pure TopologyOk
-          { msg_id
-          , in_reply_to = body.msg_id
+          { msgId
+          , inReplyTo = body.msgId
           }
 
   forever $ handle @(Union '[Broadcast, Read, Topology]) @(Union '[BroadcastOk, ReadOk, TopologyOk]) \brt -> do

@@ -17,7 +17,8 @@ where
 
 import Data.Aeson hiding (Error)
 import Data.Aeson.Types (Parser)
-import Deriving.Aeson
+import Deriving.Aeson (CustomJSON (..))
+import Deriving.Aeson.Stock (Snake)
 import GHC.Generics (Rep)
 import GHC.TypeLits (KnownSymbol, symbolVal)
 import HotGoss.ErrorCode (ErrorCode)
@@ -34,18 +35,17 @@ data Message a = Message
   , body :: a
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via CustomJSON '[] (Message a)
+  deriving (ToJSON, FromJSON) via Snake (Message a)
 
-newtype MessageJSON t os a = MkMessageJSON (CustomJSON os a)
+newtype MessageJSON t a = MkMessageJSON (Snake a)
 
 instance
   ( KnownSymbol t
-  , AesonOptions os
   , Generic a
   , GToJSON Zero (Rep a)
   , GToEncoding Zero (Rep a)
-  ) => ToJSON (MessageJSON t os a) where
-  toJSON :: MessageJSON t os a -> Value
+  ) => ToJSON (MessageJSON t a) where
+  toJSON :: MessageJSON t a -> Value
   toJSON (MkMessageJSON x) =
     case toJSON x of
       Object keyMap -> do
@@ -55,11 +55,10 @@ instance
 
 instance
   ( KnownSymbol t
-  , AesonOptions os
   , Generic a
   , GFromJSON Zero (Rep a)
-  ) => FromJSON (MessageJSON t os a) where
-  parseJSON :: Value -> Parser (MessageJSON t os a)
+  ) => FromJSON (MessageJSON t a) where
+  parseJSON :: Value -> Parser (MessageJSON t a)
   parseJSON v = MkMessageJSON <$> do
     let expected = symbolVal (Proxy @t)
 
@@ -104,7 +103,7 @@ handleInit = do
     , dest = message.src
     , body =
         InitOk
-          { in_reply_to = message.body.msg_id
+          { inReplyTo = message.body.msgId
           }
     }
   pure message.dest
@@ -115,24 +114,24 @@ log message = do
   hFlush stdout
 
 data Init = Init
-  { msg_id :: Word
-  , node_id :: Text
-  , node_ids :: [Text]
+  { msgId :: Word
+  , nodeId :: Text
+  , nodeIds :: [Text]
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "init" '[] Init
+  deriving (ToJSON, FromJSON) via MessageJSON "init" Init
 
 data InitOk = InitOk
-  { in_reply_to :: Word
+  { inReplyTo :: Word
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "init_ok" '[] InitOk
+  deriving (ToJSON, FromJSON) via MessageJSON "init_ok" InitOk
 
 data Error = Error
-  { in_reply_to :: Word
+  { inReplyTo :: Word
   , code :: ErrorCode
   , text :: Maybe Text
     -- TODO: Can include other arbitrary fields
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "error" '[] Error
+  deriving (ToJSON, FromJSON) via MessageJSON "error" Error

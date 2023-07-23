@@ -4,19 +4,19 @@ import Data.Aeson (FromJSON, ToJSON)
 import HotGoss.Protocol
 
 data Echo = Echo
-  { msg_id :: Word
+  { msgId :: Word
   , echo :: Text
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "echo" '[] Echo
+  deriving (ToJSON, FromJSON) via MessageJSON "echo" Echo
 
 data EchoOk = EchoOk
-  { msg_id :: Word
-  , in_reply_to :: Word
+  { msgId :: Word
+  , inReplyTo :: Word
   , echo :: Text
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "echo_ok" '[] EchoOk
+  deriving (ToJSON, FromJSON) via MessageJSON "echo_ok" EchoOk
 
 main :: IO ()
 main = do
@@ -27,9 +27,9 @@ main = do
   _ <- handleInit
 
   forever $ handle @Echo \body -> do
-    msg_id <- getMsgId
+    msgId <- getMsgId
     pure EchoOk
-      { msg_id
-      , in_reply_to = body.msg_id
+      { msgId
+      , inReplyTo = body.msgId
       , echo = body.echo
       }

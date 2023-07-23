@@ -5,18 +5,18 @@ import HotGoss.Protocol
 import Prelude hiding (id)
 
 data Generate = Generate
-  { msg_id :: Word
+  { msgId :: Word
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "generate" '[] Generate
+  deriving (ToJSON, FromJSON) via MessageJSON "generate" Generate
 
 data GenerateOk = GenerateOk
-  { msg_id :: Word
-  , in_reply_to :: Word
+  { msgId :: Word
+  , inReplyTo :: Word
   , id :: Text
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON "generate_ok" '[] GenerateOk
+  deriving (ToJSON, FromJSON) via MessageJSON "generate_ok" GenerateOk
 
 main :: IO ()
 main = do
@@ -26,10 +26,10 @@ main = do
 
   nodeId <- handleInit
 
-  forever $ handle @Generate \generate -> do
-    msg_id <- getMsgId
+  forever $ handle @Generate \body -> do
+    msgId <- getMsgId
     pure GenerateOk
-      { msg_id
-      , in_reply_to = generate.msg_id
-      , id = nodeId <> "-" <> show msg_id
+      { msgId
+      , inReplyTo = body.msgId
+      , id = nodeId <> "-" <> show msgId
       }
