@@ -22,10 +22,10 @@ data GenerateOk = GenerateOk
 
 main :: IO ()
 main = do
-  (getMsgId, nodeId, _) <- handleInit
+  (getMessageId, nodeId, _) <- handleInit
 
   forever $ handle @Generate \body -> do
-    msgId <- getMsgId
+    msgId <- getMessageId
     pure GenerateOk
       { msgId
       , inReplyTo = body.msgId

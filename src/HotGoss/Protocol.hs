@@ -137,10 +137,10 @@ handle k = do
 
 handleInit :: (HasCallStack, MonadIO m) => m (m MessageId, NodeId, [NodeId])
 handleInit = do
-  getMsgId <- do
+  getMessageId <- do
     ref <- newIORef 1
     pure $ atomicModifyIORef' ref \x -> (x + 1, x)
-  msgId <- getMsgId
+  msgId <- getMessageId
   req <- receive @Init
   send @InitOk Message
     { src = req.dest
@@ -151,7 +151,7 @@ handleInit = do
           , inReplyTo = req.body.msgId
           }
     }
-  pure (getMsgId, req.body.nodeId, req.body.nodeIds)
+  pure (getMessageId, req.body.nodeId, req.body.nodeIds)
 
 log :: MonadIO m => Text -> m ()
 log message = do

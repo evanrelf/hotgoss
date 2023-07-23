@@ -22,10 +22,10 @@ data EchoOk = EchoOk
 
 main :: IO ()
 main = do
-  (getMsgId, _, _) <- handleInit
+  (getMessageId, _, _) <- handleInit
 
   forever $ handle @Echo \body -> do
-    msgId <- getMsgId
+    msgId <- getMessageId
     pure EchoOk
       { msgId
       , inReplyTo = body.msgId

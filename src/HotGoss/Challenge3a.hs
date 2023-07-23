@@ -55,11 +55,11 @@ main :: IO ()
 main = do
   messagesRef <- newIORef []
 
-  (getMsgId, _, _) <- handleInit
+  (getMessageId, _, _) <- handleInit
 
   handle @Topology \body -> do
     -- TODO: body.topology
-    msgId <- getMsgId
+    msgId <- getMessageId
     pure TopologyOk
       { msgId
       , inReplyTo = body.msgId
@@ -67,7 +67,7 @@ main = do
 
   let handleBroadcast :: Broadcast -> IO BroadcastOk
       handleBroadcast body = do
-        msgId <- getMsgId
+        msgId <- getMessageId
         atomicModifyIORef' messagesRef \ms -> (body.message : ms, ())
         pure BroadcastOk
           { msgId
@@ -76,7 +76,7 @@ main = do
 
   let handleRead :: Read -> IO ReadOk
       handleRead body = do
-        msgId <- getMsgId
+        msgId <- getMessageId
         messages <- readIORef messagesRef
         pure ReadOk
           { msgId
