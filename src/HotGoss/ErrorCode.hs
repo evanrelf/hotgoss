@@ -22,7 +22,8 @@ data ErrorCode
   | KeyAlreadyExists
   | PreconditionFailed
   | TransactionConflict
-  | Unknown Word
+  | UnknownMaelstrom Word
+  | User Word
   deriving stock (Data, Show)
 
 instance Aeson.ToJSON ErrorCode where
@@ -46,7 +47,8 @@ toErrorCode = \case
   21 -> KeyAlreadyExists
   22 -> PreconditionFailed
   30 -> TransactionConflict
-  n -> Unknown n
+  n | n < 1000 -> UnknownMaelstrom n
+    | otherwise -> User n
 
 fromErrorCode :: ErrorCode -> Word
 fromErrorCode = \case
@@ -61,4 +63,5 @@ fromErrorCode = \case
   KeyAlreadyExists -> 21
   PreconditionFailed -> 22
   TransactionConflict -> 30
-  Unknown n -> n
+  UnknownMaelstrom n -> n
+  User n -> n
