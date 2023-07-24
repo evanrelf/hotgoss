@@ -37,11 +37,11 @@ import qualified UnliftIO.Exception as Exception
 
 newtype NodeId = NodeId Text
   deriving stock (Generic, Data, Show, Eq)
-  deriving newtype (IsString, Display, ToJSON, ToJSONKey, FromJSON, FromJSONKey, Hashable)
+  deriving newtype (Display, ToJSON, ToJSONKey, FromJSON, FromJSONKey, Hashable)
 
 newtype MessageId = MessageId Word
   deriving stock (Generic, Data, Show)
-  deriving newtype (Num, Display, ToJSON, FromJSON)
+  deriving newtype (Display, ToJSON, FromJSON)
 
 data Message a = Message
   { src :: NodeId
@@ -154,7 +154,7 @@ handleInit :: (HasCallStack, MonadIO m) => m (m MessageId, NodeId, [NodeId])
 handleInit = do
   getMessageId <- do
     ref <- newIORef 1
-    pure $ atomicModifyIORef' ref \x -> (x + 1, x)
+    pure $ atomicModifyIORef' ref \x -> (x + 1, MessageId x)
   msgId <- getMessageId
   req <- receive @Init
   send @InitOk Message
