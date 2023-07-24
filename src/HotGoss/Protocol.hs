@@ -23,6 +23,7 @@ where
 import Data.Aeson hiding (Error)
 import Data.Aeson.Types (Parser)
 import Data.Data (Data)
+import Data.Text.Display (Display)
 import Deriving.Aeson
 import GHC.Generics (Rep)
 import GHC.Records (HasField (..))
@@ -36,20 +37,11 @@ import qualified UnliftIO.Exception as Exception
 
 newtype NodeId = NodeId Text
   deriving stock (Generic, Data, Show, Eq)
-  deriving newtype
-    ( IsString
-    , ToString
-    , ToText
-    , ToJSON
-    , ToJSONKey
-    , FromJSON
-    , FromJSONKey
-    , Hashable
-    )
+  deriving newtype (IsString, Display, ToJSON, ToJSONKey, FromJSON, FromJSONKey, Hashable)
 
 newtype MessageId = MessageId Word
   deriving stock (Generic, Data, Show)
-  deriving newtype (Num, ToJSON, FromJSON)
+  deriving newtype (Num, Display, ToJSON, FromJSON)
 
 data Message a = Message
   { src :: NodeId

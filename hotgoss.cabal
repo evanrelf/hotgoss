@@ -51,7 +51,7 @@ library
   build-depends:
     , aeson
     , deriving-aeson
-    , text
+    , text-display
     , unliftio
   exposed-modules:
     HotGoss

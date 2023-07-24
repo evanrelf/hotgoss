@@ -11,6 +11,17 @@
       let
         overlays = [
           (final: prev: {
+            haskellPackages =
+              prev.haskellPackages.override {
+                overrides = hfinal: hprev: {
+                  text-display =
+                    final.lib.pipe hprev.text-display [
+                      final.haskell.lib.compose.unmarkBroken
+                      final.haskell.lib.compose.doJailbreak
+                      (final.haskell.lib.compose.appendConfigureFlag "-f-book")
+                    ];
+                };
+              };
             maelstrom = final.callPackage ./maelstrom.nix { };
           })
         ];
