@@ -6,6 +6,8 @@ import HotGoss.Protocol
 import HotGoss.Union
 import Prelude hiding (Read)
 
+import qualified Data.HashSet as HashSet
+
 data Broadcast = Broadcast
   { msgId :: MessageId
   , inReplyTo :: Omitted
@@ -31,7 +33,7 @@ data Read = Read
 data ReadOk = ReadOk
   { msgId :: MessageId
   , inReplyTo :: MessageId
-  , messages :: [Word]
+  , messages :: HashSet Word
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON ReadOk
@@ -39,7 +41,7 @@ data ReadOk = ReadOk
 data Topology = Topology
   { msgId :: MessageId
   , inReplyTo :: Omitted
-  , topology :: HashMap NodeId [NodeId]
+  , topology :: HashMap NodeId (HashSet NodeId)
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageJSON Topology
@@ -53,7 +55,7 @@ data TopologyOk = TopologyOk
 
 main :: IO ()
 main = do
-  messagesRef <- newIORef []
+  messagesRef <- newIORef HashSet.empty
 
   (getMessageId, _, _) <- handleInit
 
@@ -68,7 +70,7 @@ main = do
   let handleBroadcast :: Broadcast -> IO BroadcastOk
       handleBroadcast body = do
         msgId <- getMessageId
-        atomicModifyIORef' messagesRef \ms -> (body.message : ms, ())
+        atomicModifyIORef' messagesRef \ms -> (HashSet.insert body.message ms, ())
         pure BroadcastOk
           { msgId
           , inReplyTo = body.msgId
