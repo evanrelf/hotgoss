@@ -6,8 +6,7 @@ module HotGoss.Protocol
   , Message (..)
   , MessageJSON (..)
   , CustomJSON (..)
-  , Omitted
-  , pattern Omitted
+  , Omitted (Omitted)
   , send
   , receive
   , handle
@@ -28,6 +27,7 @@ import Deriving.Aeson
 import GHC.Generics (Rep)
 import GHC.Records (HasField (..))
 import HotGoss.ErrorCode (ErrorCode)
+import Text.Show (Show (..))
 
 import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.ByteString.Lazy as LByteString
@@ -36,11 +36,11 @@ import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
 newtype NodeId = NodeId Text
-  deriving stock (Generic, Data, Show, Eq)
+  deriving stock (Data, Show, Eq)
   deriving newtype (Display, ToJSON, ToJSONKey, FromJSON, FromJSONKey, Hashable)
 
 newtype MessageId = MessageId Word
-  deriving stock (Generic, Data, Show)
+  deriving stock (Data, Show)
   deriving newtype (Display, ToJSON, FromJSON)
 
 data Message a = Message
@@ -55,10 +55,18 @@ data Message a = Message
 newtype MessageJSON a = MessageJSON
   (CustomJSON '[FieldLabelModifier CamelToSnake, OmitNothingFields] a)
 
-type Omitted = Maybe Void
+-- Workaround until we can use `omit{,ted}Field` from `aeson` 2.2.0.0
+newtype Omitted = MkOmitted (Maybe Void)
+  deriving stock (Data)
+  deriving newtype (ToJSON, FromJSON)
 
-pattern Omitted :: Maybe Void
-pattern Omitted = Nothing
+pattern Omitted :: Omitted
+pattern Omitted = MkOmitted Nothing
+
+{-# COMPLETE Omitted #-}
+
+instance Show Omitted where
+  show _ = "Omitted"
 
 messageType :: forall a s. (Data a, IsString s) => Proxy a -> s
 messageType _ =
