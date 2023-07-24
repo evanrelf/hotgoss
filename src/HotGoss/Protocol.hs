@@ -76,10 +76,9 @@ messageType _ =
   & getStringModifier @CamelToSnake
   & fromString
 
-type IsMessage :: Type -> Constraint
-type family IsMessage a where
-  IsMessage (Message a) = IsMessage a
-  IsMessage a = (HasSomeField "msgId" a, HasSomeField "inReplyTo" a)
+class IsMessage a
+instance IsMessage a => IsMessage (Message a)
+instance (HasSomeField "msgId" a, HasSomeField "inReplyTo" a) => IsMessage a
 
 class HasSomeField x r
 instance HasField x r a => HasSomeField x r
