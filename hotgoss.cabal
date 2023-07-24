@@ -15,6 +15,7 @@ common common
   default-extensions:
     BlockArguments
     DataKinds
+    DeriveAnyClass
     DerivingStrategies
     DerivingVia
     DuplicateRecordFields
@@ -51,6 +52,7 @@ library
   build-depends:
     , aeson
     , deriving-aeson
+    , sop-core
     , text-display
     , unliftio
   exposed-modules:
@@ -61,6 +63,7 @@ library
     HotGoss.Challenge3b
     HotGoss.ErrorCode
     HotGoss.Protocol
+    HotGoss.Protocol2
     HotGoss.Union
 
 executable hotgoss
