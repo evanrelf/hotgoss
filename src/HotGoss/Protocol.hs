@@ -1,18 +1,19 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 module HotGoss.Protocol
-  ( NodeId (..)
-  , MessageId (..)
-  , Message (..)
+  ( Message (..)
+  , IsMessage
   , MessageJSON (..)
   , CustomJSON (..)
+  , NodeId (..)
+  , MessageId (..)
   , Omitted (Omitted)
+  , log
   , send
   , receive
   , handle
   , handle_
   , handleInit
-  , log
   , Init (..)
   , InitOk (..)
   , Error (..)
@@ -35,14 +36,6 @@ import qualified Data.Data as Data
 import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
-newtype NodeId = NodeId Text
-  deriving stock (Data, Show, Eq)
-  deriving newtype (Display, ToJSON, ToJSONKey, FromJSON, FromJSONKey, Hashable)
-
-newtype MessageId = MessageId Word
-  deriving stock (Data, Show)
-  deriving newtype (Display, ToJSON, FromJSON)
-
 data Message a = Message
   { src :: NodeId
   , dest :: NodeId
@@ -52,21 +45,15 @@ data Message a = Message
   deriving (ToJSON, FromJSON) via
     CustomJSON '[FieldLabelModifier CamelToSnake] (Message a)
 
+class HasSomeField x r
+instance HasField x r a => HasSomeField x r
+
+class IsMessage a
+instance IsMessage a => IsMessage (Message a)
+instance (HasSomeField "msgId" a, HasSomeField "inReplyTo" a) => IsMessage a
+
 newtype MessageJSON a = MessageJSON
   (CustomJSON '[FieldLabelModifier CamelToSnake, OmitNothingFields] a)
-
--- Workaround until we can use `omit{,ted}Field` from `aeson` 2.2.0.0
-newtype Omitted = MkOmitted (Maybe Void)
-  deriving stock (Data)
-  deriving newtype (ToJSON, FromJSON)
-
-pattern Omitted :: Omitted
-pattern Omitted = MkOmitted Nothing
-
-{-# COMPLETE Omitted #-}
-
-instance Show Omitted where
-  show _ = "Omitted"
 
 messageType :: forall a s. (Data a, IsString s) => Proxy a -> s
 messageType _ =
@@ -75,13 +62,6 @@ messageType _ =
   & Data.tyconUQname
   & getStringModifier @CamelToSnake
   & fromString
-
-class IsMessage a
-instance IsMessage a => IsMessage (Message a)
-instance (HasSomeField "msgId" a, HasSomeField "inReplyTo" a) => IsMessage a
-
-class HasSomeField x r
-instance HasField x r a => HasSomeField x r
 
 instance
   ( Generic a
@@ -111,6 +91,32 @@ instance
         fail $ "Expected `" <> expected <> "`, got `" <> actual <> "`"
 
     parseJSON v
+
+newtype NodeId = NodeId Text
+  deriving stock (Data, Show, Eq)
+  deriving newtype (Display, ToJSON, ToJSONKey, FromJSON, FromJSONKey, Hashable)
+
+newtype MessageId = MessageId Word
+  deriving stock (Data, Show)
+  deriving newtype (Display, ToJSON, FromJSON)
+
+-- Workaround until we can use `omit{,ted}Field` from `aeson` 2.2.0.0
+newtype Omitted = MkOmitted (Maybe Void)
+  deriving stock (Data)
+  deriving newtype (ToJSON, FromJSON)
+
+pattern Omitted :: Omitted
+pattern Omitted = MkOmitted Nothing
+
+{-# COMPLETE Omitted #-}
+
+instance Show Omitted where
+  show _ = "Omitted"
+
+log :: MonadIO m => Text -> m ()
+log message = do
+  liftIO $ Text.hPutStrLn stderr message
+  hFlush stdout
 
 send :: (IsMessage a, ToJSON a, MonadIO m) => Message a -> m ()
 send message = do
@@ -174,11 +180,6 @@ handleInit = do
           }
     }
   pure (getMessageId, req.body.nodeId, req.body.nodeIds)
-
-log :: MonadIO m => Text -> m ()
-log message = do
-  liftIO $ Text.hPutStrLn stderr message
-  hFlush stdout
 
 data Init = Init
   { msgId :: MessageId
