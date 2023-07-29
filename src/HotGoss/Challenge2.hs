@@ -25,7 +25,7 @@ main :: IO ()
 main = do
   (getMessageId, nodeId, _) <- handleInit
 
-  forever $ handle_ @Generate \body -> do
+  forever $ handle @Generate \body -> do
     msgId <- getMessageId
     pure GenerateOk
       { msgId

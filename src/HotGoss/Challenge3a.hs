@@ -57,7 +57,7 @@ main = do
 
   (getMessageId, _, _) <- handleInit
 
-  handle_ @Topology \body -> do
+  handle @Topology \body -> do
     -- TODO: body.topology
     msgId <- getMessageId
     pure TopologyOk
@@ -84,7 +84,7 @@ main = do
           , messages
           }
 
-  forever $ handle_ @_ @(Union '[BroadcastOk, ReadOk]) $
+  forever $ handle @_ @(Union '[BroadcastOk, ReadOk]) $
     case_
       `on` (\msg -> handleRead msg <&> inject)
       `on` (\msg -> handleBroadcast msg <&> inject)

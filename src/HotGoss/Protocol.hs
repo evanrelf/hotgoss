@@ -1,18 +1,13 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 module HotGoss.Protocol
-  ( Message (..)
+  ( Message
   , MessageOrigin (..)
-  , IsMessage
   , MessageBodyJson (..)
   , NodeId (..)
   , MessageId (..)
   , Omitted (Omitted)
-  , log
-  , send
-  , receive
   , handle
-  , handle_
   , handleInit
   , Init (..)
   , InitOk (..)
@@ -32,7 +27,6 @@ import HotGoss.ErrorCode (ErrorCode)
 import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.ByteString.Lazy as LByteString
 import qualified Data.Data as Data
-import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
 data Message o a = Message
@@ -141,29 +135,16 @@ handle
      , ToJSON res
      , MonadIO m
      )
-  => (req -> m (res, a))
-  -> m a
+  => (req -> m res)
+  -> m ()
 handle k = do
   req <- receive
-  (body, x) <- k req.body
+  body <- k req.body
   send Message
     { src = req.dest
     , dest = req.src
     , body
     }
-  pure x
-
-handle_
-  :: ( HasCallStack
-     , IsMessage req
-     , IsMessage res
-     , FromJSON req
-     , ToJSON res
-     , MonadIO m
-     )
-  => (req -> m res)
-  -> m ()
-handle_ k = handle (fmap (, ()) . k)
 
 handleInit :: (HasCallStack, MonadIO m) => m (m MessageId, NodeId, [NodeId])
 handleInit = do
