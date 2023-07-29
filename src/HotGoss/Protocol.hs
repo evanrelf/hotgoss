@@ -49,13 +49,12 @@ data MessageOrigin
 class HasSomeField x r
 instance HasField x r a => HasSomeField x r
 
-class IsMessage a
-instance IsMessage a => IsMessage (Message a)
+class IsMessageBody a
 instance
   ( HasSomeField "msgId" a
   , HasSomeField "inReplyTo" a
   , ToJSON a
-  ) => IsMessage a
+  ) => IsMessageBody a
 
 newtype MessageBodyJson a = MessageBodyJson a
   deriving stock (Generic, Data, Show)
@@ -118,14 +117,14 @@ instance ToJSON Omitted where
 instance FromJSON Omitted where
   parseJSON v = maybe Omitted absurd <$> parseJSON v
 
-send :: (IsMessage a, ToJSON a, MonadIO m) => Message Endo a -> m ()
+send :: (IsMessageBody a, ToJSON a, MonadIO m) => Message Endo a -> m ()
 send message = do
   let bytes = encode message <> "\n"
   liftIO $ LByteString.hPut stdout bytes
   hFlush stdout
 
 receive
-  :: (HasCallStack, IsMessage a, FromJSON a, MonadIO m)
+  :: (HasCallStack, IsMessageBody a, FromJSON a, MonadIO m)
   => m (Message Exo a)
 receive = do
   bytes <- encodeUtf8 <$> getLine
@@ -133,8 +132,8 @@ receive = do
 
 handle
   :: ( HasCallStack
-     , IsMessage req
-     , IsMessage res
+     , IsMessageBody req
+     , IsMessageBody res
      , FromJSON req
      , ToJSON res
      , MonadIO m
