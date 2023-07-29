@@ -29,7 +29,6 @@ import Deriving.Aeson
 import GHC.Generics (Rep)
 import GHC.Records (HasField (..))
 import HotGoss.ErrorCode (ErrorCode)
-import Text.Show (Show (..))
 
 import qualified Data.Aeson.KeyMap as KeyMap
 import qualified Data.ByteString.Lazy as LByteString
@@ -109,23 +108,14 @@ newtype MessageId = MessageId Word
   deriving stock (Data, Show)
   deriving newtype (Display, ToJSON, FromJSON)
 
--- Workaround until we can use `omit{,ted}Field` from `aeson` 2.2.0.0
-newtype Omitted = MkOmitted (Maybe Void)
-  deriving stock (Data)
-  deriving newtype (ToJSON, FromJSON)
+data Omitted = Omitted
+  deriving stock (Data, Show)
 
-pattern Omitted :: Omitted
-pattern Omitted = MkOmitted Nothing
+instance ToJSON Omitted where
+  toJSON _ = Null
 
-{-# COMPLETE Omitted #-}
-
-instance Show Omitted where
-  show _ = "Omitted"
-
-log :: MonadIO m => Text -> m ()
-log message = do
-  liftIO $ Text.hPutStrLn stderr message
-  hFlush stdout
+instance FromJSON Omitted where
+  parseJSON v = maybe Omitted absurd <$> parseJSON v
 
 send :: (IsMessage a, ToJSON a, MonadIO m) => Message Endo a -> m ()
 send message = do
