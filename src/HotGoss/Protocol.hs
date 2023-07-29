@@ -51,7 +51,11 @@ instance HasField x r a => HasSomeField x r
 
 class IsMessage a
 instance IsMessage a => IsMessage (Message a)
-instance (HasSomeField "msgId" a, HasSomeField "inReplyTo" a) => IsMessage a
+instance
+  ( HasSomeField "msgId" a
+  , HasSomeField "inReplyTo" a
+  , ToJSON a
+  ) => IsMessage a
 
 newtype MessageBodyJson a = MessageBodyJson a
   deriving stock (Generic, Data, Show)
