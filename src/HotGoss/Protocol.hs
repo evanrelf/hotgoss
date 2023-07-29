@@ -5,7 +5,6 @@ module HotGoss.Protocol
   , MessageOrigin (..)
   , IsMessage
   , MessageBodyJson (..)
-  , CustomJSON (..)
   , NodeId (..)
   , MessageId (..)
   , Omitted (Omitted)
@@ -60,7 +59,11 @@ class IsMessage a
 instance IsMessage a => IsMessage (Message a)
 instance (HasSomeField "msgId" a, HasSomeField "inReplyTo" a) => IsMessage a
 
-newtype MessageBodyJson a = MessageBodyJson
+newtype MessageBodyJson a = MessageBodyJson a
+  deriving stock (Generic, Data, Show)
+  deriving (ToJSON, FromJSON) via MessageBodyJsonInner (MessageBodyJson a)
+
+newtype MessageBodyJsonInner a = MessageBodyJsonInner
   (CustomJSON '[FieldLabelModifier CamelToSnake, OmitNothingFields] a)
 
 messageType :: forall a s. (Data a, IsString s) => Proxy a -> s
@@ -76,9 +79,9 @@ instance
   , Data a
   , GToJSON Zero (Rep a)
   , GToEncoding Zero (Rep a)
-  ) => ToJSON (MessageBodyJson a) where
-  toJSON :: MessageBodyJson a -> Value
-  toJSON (MessageBodyJson x) =
+  ) => ToJSON (MessageBodyJsonInner a) where
+  toJSON :: MessageBodyJsonInner a -> Value
+  toJSON (MessageBodyJsonInner x) =
     case toJSON x of
       Object keyMap ->
         Object $ KeyMap.insert "type" (messageType (Proxy @a)) keyMap
@@ -88,9 +91,9 @@ instance
   ( Generic a
   , Data a
   , GFromJSON Zero (Rep a)
-  ) => FromJSON (MessageBodyJson a) where
-  parseJSON :: Value -> Parser (MessageBodyJson a)
-  parseJSON v = MessageBodyJson <$> do
+  ) => FromJSON (MessageBodyJsonInner a) where
+  parseJSON :: Value -> Parser (MessageBodyJsonInner a)
+  parseJSON v = MessageBodyJsonInner <$> do
     let expected = messageType (Proxy @a)
 
     v & withObject expected \o -> do
