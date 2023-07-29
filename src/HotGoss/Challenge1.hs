@@ -10,7 +10,7 @@ data Echo = Echo
   , echo :: Text
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON Echo
+  deriving (ToJSON, FromJSON) via MessageBodyJson Echo
 
 data EchoOk = EchoOk
   { msgId :: MessageId
@@ -18,7 +18,7 @@ data EchoOk = EchoOk
   , echo :: Text
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON EchoOk
+  deriving (ToJSON, FromJSON) via MessageBodyJson EchoOk
 
 main :: IO ()
 main = do

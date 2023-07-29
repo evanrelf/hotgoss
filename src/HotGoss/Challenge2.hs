@@ -11,7 +11,7 @@ data Generate = Generate
   , inReplyTo :: Omitted
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON Generate
+  deriving (ToJSON, FromJSON) via MessageBodyJson Generate
 
 data GenerateOk = GenerateOk
   { msgId :: MessageId
@@ -19,7 +19,7 @@ data GenerateOk = GenerateOk
   , id :: Text
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON GenerateOk
+  deriving (ToJSON, FromJSON) via MessageBodyJson GenerateOk
 
 main :: IO ()
 main = do

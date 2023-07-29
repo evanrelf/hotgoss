@@ -4,7 +4,7 @@ module HotGoss.Protocol
   ( Message (..)
   , MessageOrigin (..)
   , IsMessage
-  , MessageJSON (..)
+  , MessageBodyJson (..)
   , CustomJSON (..)
   , NodeId (..)
   , MessageId (..)
@@ -61,7 +61,7 @@ class IsMessage a
 instance IsMessage a => IsMessage (Message a)
 instance (HasSomeField "msgId" a, HasSomeField "inReplyTo" a) => IsMessage a
 
-newtype MessageJSON a = MessageJSON
+newtype MessageBodyJson a = MessageBodyJson
   (CustomJSON '[FieldLabelModifier CamelToSnake, OmitNothingFields] a)
 
 messageType :: forall a s. (Data a, IsString s) => Proxy a -> s
@@ -77,9 +77,9 @@ instance
   , Data a
   , GToJSON Zero (Rep a)
   , GToEncoding Zero (Rep a)
-  ) => ToJSON (MessageJSON a) where
-  toJSON :: MessageJSON a -> Value
-  toJSON (MessageJSON x) =
+  ) => ToJSON (MessageBodyJson a) where
+  toJSON :: MessageBodyJson a -> Value
+  toJSON (MessageBodyJson x) =
     case toJSON x of
       Object keyMap ->
         Object $ KeyMap.insert "type" (messageType (Proxy @a)) keyMap
@@ -89,9 +89,9 @@ instance
   ( Generic a
   , Data a
   , GFromJSON Zero (Rep a)
-  ) => FromJSON (MessageJSON a) where
-  parseJSON :: Value -> Parser (MessageJSON a)
-  parseJSON v = MessageJSON <$> do
+  ) => FromJSON (MessageBodyJson a) where
+  parseJSON :: Value -> Parser (MessageBodyJson a)
+  parseJSON v = MessageBodyJson <$> do
     let expected = messageType (Proxy @a)
 
     v & withObject expected \o -> do
@@ -197,14 +197,14 @@ data Init = Init
   , nodeIds :: [NodeId]
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON Init
+  deriving (ToJSON, FromJSON) via MessageBodyJson Init
 
 data InitOk = InitOk
   { msgId :: MessageId
   , inReplyTo :: MessageId
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON InitOk
+  deriving (ToJSON, FromJSON) via MessageBodyJson InitOk
 
 data Error = Error
   { inReplyTo :: MessageId
@@ -213,4 +213,4 @@ data Error = Error
     -- TODO: Can include other arbitrary fields
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON Error
+  deriving (ToJSON, FromJSON) via MessageBodyJson Error

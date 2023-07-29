@@ -12,21 +12,21 @@ data Broadcast = Broadcast
   , message :: Word
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON Broadcast
+  deriving (ToJSON, FromJSON) via MessageBodyJson Broadcast
 
 data BroadcastOk = BroadcastOk
   { msgId :: MessageId
   , inReplyTo :: MessageId
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON BroadcastOk
+  deriving (ToJSON, FromJSON) via MessageBodyJson BroadcastOk
 
 data Read = Read
   { msgId :: MessageId
   , inReplyTo :: Omitted
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON Read
+  deriving (ToJSON, FromJSON) via MessageBodyJson Read
 
 data ReadOk = ReadOk
   { msgId :: MessageId
@@ -34,7 +34,7 @@ data ReadOk = ReadOk
   , messages :: [Word]
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON ReadOk
+  deriving (ToJSON, FromJSON) via MessageBodyJson ReadOk
 
 data Topology = Topology
   { msgId :: MessageId
@@ -42,14 +42,14 @@ data Topology = Topology
   , topology :: HashMap NodeId [NodeId]
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON Topology
+  deriving (ToJSON, FromJSON) via MessageBodyJson Topology
 
 data TopologyOk = TopologyOk
   { msgId :: MessageId
   , inReplyTo :: MessageId
   }
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageJSON TopologyOk
+  deriving (ToJSON, FromJSON) via MessageBodyJson TopologyOk
 
 main :: IO ()
 main = do
