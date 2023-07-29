@@ -4,7 +4,7 @@ import Data.Aeson (FromJSON, ToJSON)
 import Data.Data (Data)
 import HotGoss.Protocol
 import HotGoss.Union
-import Prelude hiding (Read)
+import Prelude hiding (Read, on)
 
 data Broadcast = Broadcast
   { msgId :: MessageId
@@ -84,7 +84,7 @@ main = do
           , messages
           }
 
-  forever $ handle_ @(Union '[Broadcast, Read]) @(Union '[BroadcastOk, ReadOk]) \br ->
-    case decompose @Broadcast br of
-      Right b -> inject <$> handleBroadcast b
-      Left (extract -> r) -> inject <$> handleRead r
+  forever $ handle_ @_ @(Union '[BroadcastOk, ReadOk]) $
+    case_
+      `on` (\msg -> handleRead msg <&> inject)
+      `on` (\msg -> handleBroadcast msg <&> inject)

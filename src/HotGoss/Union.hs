@@ -5,12 +5,15 @@ module HotGoss.Union
   , decompose
   , weaken
   , extract
+  , case_
+  , on
   )
 where
 
 import Data.Aeson
 import Data.Aeson.Types (Parser)
 import GHC.Records (HasField (..))
+import Prelude hiding (on)
 
 data Union (r :: [Type]) where
   Zero :: a -> Union (a : r)
@@ -58,6 +61,14 @@ extract :: Union '[a] -> a
 extract = \case
   Zero a -> a
   Succ u -> case u of
+
+case_ :: Union '[] -> a
+case_ = \case
+
+on :: (Union r -> b) -> (a -> b) -> Union (a : r) -> b
+on s z = \case
+  Zero a -> z a
+  Succ u -> s u
 
 instance {-# OVERLAPPABLE #-} (HasField x r a, HasField x (Union rs) a)
   => HasField x (Union (r : rs)) a where
