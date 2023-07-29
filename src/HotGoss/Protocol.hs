@@ -2,6 +2,7 @@
 
 module HotGoss.Protocol
   ( Message (..)
+  , MessageOrigin (..)
   , IsMessage
   , MessageJSON (..)
   , CustomJSON (..)
@@ -36,14 +37,22 @@ import qualified Data.Data as Data
 import qualified Data.Text.IO as Text
 import qualified UnliftIO.Exception as Exception
 
-data Message a = Message
+data Message o a = Message
   { src :: NodeId
   , dest :: NodeId
   , body :: a
   }
   deriving stock (Generic, Show)
-  deriving (ToJSON, FromJSON) via
-    CustomJSON '[FieldLabelModifier CamelToSnake] (Message a)
+
+deriving via CustomJSON '[FieldLabelModifier CamelToSnake] (Message Endo a)
+  instance ToJSON a => ToJSON (Message Endo a)
+
+deriving via CustomJSON '[FieldLabelModifier CamelToSnake] (Message Exo a)
+  instance FromJSON a => FromJSON (Message Exo a)
+
+data MessageOrigin
+  = Endo
+  | Exo
 
 class HasSomeField x r
 instance HasField x r a => HasSomeField x r
@@ -118,7 +127,7 @@ log message = do
   liftIO $ Text.hPutStrLn stderr message
   hFlush stdout
 
-send :: (IsMessage a, ToJSON a, MonadIO m) => Message a -> m ()
+send :: (IsMessage a, ToJSON a, MonadIO m) => Message Endo a -> m ()
 send message = do
   let bytes = encode message <> "\n"
   liftIO $ LByteString.hPut stdout bytes
@@ -126,7 +135,7 @@ send message = do
 
 receive
   :: (HasCallStack, IsMessage a, FromJSON a, MonadIO m)
-  => m (Message a)
+  => m (Message Exo a)
 receive = do
   bytes <- encodeUtf8 <$> getLine
   either Exception.throwString pure $ eitherDecode' bytes
