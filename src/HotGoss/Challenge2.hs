@@ -8,7 +8,6 @@ import Prelude hiding (id)
 
 data Generate = Generate
   { msgId :: MessageId
-  , inReplyTo :: Omitted
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageBodyJson Generate

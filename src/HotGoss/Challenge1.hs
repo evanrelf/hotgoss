@@ -6,7 +6,6 @@ import HotGoss.Protocol
 
 data Echo = Echo
   { msgId :: MessageId
-  , inReplyTo :: Omitted
   , echo :: Text
   }
   deriving stock (Generic, Data, Show)

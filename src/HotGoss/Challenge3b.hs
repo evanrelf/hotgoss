@@ -10,7 +10,6 @@ import qualified Data.HashSet as HashSet
 
 data Broadcast = Broadcast
   { msgId :: MessageId
-  , inReplyTo :: Omitted
   , message :: Word
   }
   deriving stock (Generic, Data, Show)
@@ -25,7 +24,6 @@ data BroadcastOk = BroadcastOk
 
 data Read = Read
   { msgId :: MessageId
-  , inReplyTo :: Omitted
   }
   deriving stock (Generic, Data, Show)
   deriving (ToJSON, FromJSON) via MessageBodyJson Read
@@ -40,7 +38,6 @@ data ReadOk = ReadOk
 
 data Topology = Topology
   { msgId :: MessageId
-  , inReplyTo :: Omitted
   , topology :: HashMap NodeId (HashSet NodeId)
   }
   deriving stock (Generic, Data, Show)

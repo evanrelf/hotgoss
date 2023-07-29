@@ -6,7 +6,6 @@ module HotGoss.Protocol
   , MessageBodyJson (..)
   , NodeId (..)
   , MessageId (..)
-  , Omitted (Omitted)
   , handle
   , handleInit
   , Init (..)
@@ -21,7 +20,6 @@ import Data.Data (Data)
 import Data.Text.Display (Display)
 import Deriving.Aeson
 import GHC.Generics (Rep)
-import GHC.Records (HasField (..))
 import HotGoss.ErrorCode (ErrorCode)
 
 import qualified Data.Aeson.KeyMap as KeyMap
@@ -46,22 +44,10 @@ data MessageOrigin
   = Endo
   | Exo
 
-class HasSomeField x r
-instance HasField x r a => HasSomeField x r
-
-class IsMessageBody a
-instance
-  ( HasSomeField "msgId" a
-  , HasSomeField "inReplyTo" a
-  , ToJSON a
-  ) => IsMessageBody a
-
 newtype MessageBodyJson a = MessageBodyJson a
   deriving stock (Generic, Data, Show)
-  deriving (ToJSON, FromJSON) via MessageBodyJsonInner (MessageBodyJson a)
 
-newtype MessageBodyJsonInner a = MessageBodyJsonInner
-  (CustomJSON '[FieldLabelModifier CamelToSnake, OmitNothingFields] a)
+type MessageBodyJsonImpl a = CustomJSON '[FieldLabelModifier CamelToSnake] a
 
 messageType :: forall a s. (Data a, IsString s) => Proxy a -> s
 messageType _ =
@@ -76,10 +62,10 @@ instance
   , Data a
   , GToJSON Zero (Rep a)
   , GToEncoding Zero (Rep a)
-  ) => ToJSON (MessageBodyJsonInner a) where
-  toJSON :: MessageBodyJsonInner a -> Value
-  toJSON (MessageBodyJsonInner x) =
-    case toJSON x of
+  ) => ToJSON (MessageBodyJson a) where
+  toJSON :: MessageBodyJson a -> Value
+  toJSON (MessageBodyJson x) =
+    case toJSON @(MessageBodyJsonImpl a) (CustomJSON x) of
       Object keyMap ->
         Object $ KeyMap.insert "type" (messageType (Proxy @a)) keyMap
       other -> other
@@ -88,9 +74,9 @@ instance
   ( Generic a
   , Data a
   , GFromJSON Zero (Rep a)
-  ) => FromJSON (MessageBodyJsonInner a) where
-  parseJSON :: Value -> Parser (MessageBodyJsonInner a)
-  parseJSON v = MessageBodyJsonInner <$> do
+  ) => FromJSON (MessageBodyJson a) where
+  parseJSON :: Value -> Parser (MessageBodyJson a)
+  parseJSON v = MessageBodyJson <$> do
     let expected = messageType (Proxy @a)
 
     v & withObject expected \o -> do
@@ -98,7 +84,7 @@ instance
       when (expected /= actual) do
         fail $ "Expected `" <> expected <> "`, got `" <> actual <> "`"
 
-    parseJSON v
+    parseJSON @(MessageBodyJsonImpl a) v <&> \case CustomJSON x -> x
 
 newtype NodeId = NodeId Text
   deriving stock (Data, Show, Eq)
@@ -108,23 +94,14 @@ newtype MessageId = MessageId Word
   deriving stock (Data, Show)
   deriving newtype (Display, ToJSON, FromJSON)
 
-data Omitted = Omitted
-  deriving stock (Data, Show)
-
-instance ToJSON Omitted where
-  toJSON _ = Null
-
-instance FromJSON Omitted where
-  parseJSON v = maybe Omitted absurd <$> parseJSON v
-
-send :: (IsMessageBody a, ToJSON a, MonadIO m) => Message Endo a -> m ()
+send :: (ToJSON a, MonadIO m) => Message Endo a -> m ()
 send message = do
   let bytes = encode message <> "\n"
   liftIO $ LByteString.hPut stdout bytes
   hFlush stdout
 
 receive
-  :: (HasCallStack, IsMessageBody a, FromJSON a, MonadIO m)
+  :: (HasCallStack, FromJSON a, MonadIO m)
   => m (Message Exo a)
 receive = do
   bytes <- encodeUtf8 <$> getLine
@@ -132,8 +109,6 @@ receive = do
 
 handle
   :: ( HasCallStack
-     , IsMessageBody req
-     , IsMessageBody res
      , FromJSON req
      , ToJSON res
      , MonadIO m
@@ -169,7 +144,6 @@ handleInit = do
 
 data Init = Init
   { msgId :: MessageId
-  , inReplyTo :: Omitted
   , nodeId :: NodeId
   , nodeIds :: [NodeId]
   }
