@@ -1,13 +1,17 @@
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 module HotGoss.Protocol2
-  ( Message
+  ( Message (..)
   , MessageOrigin (..)
   , MessageBodyJson (..)
   , CustomJSON (..)
   , NodeId (..)
   , MessageId (..)
   , Omitted (Omitted)
+  , sendTo
+  , replyTo
+  , Handler (..)
+  , node
   , Init (..)
   , InitOk (..)
   , Error (..)
