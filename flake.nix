@@ -40,6 +40,7 @@
               buildInputs = [
                 pkgs.cabal-install
                 pkgs.ghcid
+                pkgs.haskellPackages.ghc-tags
                 pkgs.maelstrom
               ];
             });
