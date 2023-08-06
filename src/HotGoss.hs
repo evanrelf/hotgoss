@@ -1,11 +1,11 @@
 module HotGoss (main) where
 
-import qualified Data.Text.IO as Text
-import qualified HotGoss.Challenge1
-import qualified HotGoss.Challenge2
-import qualified HotGoss.Challenge3a
-import qualified HotGoss.Challenge3b
-import qualified UnliftIO.Environment as Environment
+import Data.Text.IO qualified as Text
+import HotGoss.Challenge1 qualified
+import HotGoss.Challenge2 qualified
+import HotGoss.Challenge3a qualified
+import HotGoss.Challenge3b qualified
+import UnliftIO.Environment qualified as Environment
 
 main :: IO ()
 main = do

@@ -5,10 +5,9 @@ module HotGoss.ErrorCode
   )
 where
 
+import Data.Aeson qualified as Aeson
+import Data.Aeson.Types qualified as Aeson (Parser)
 import Data.Data (Data)
-
-import qualified Data.Aeson as Aeson
-import qualified Data.Aeson.Types as Aeson (Parser)
 
 data ErrorCode
   = Timeout

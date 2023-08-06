@@ -2,11 +2,10 @@ module HotGoss.Challenge3b (main) where
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Data (Data)
+import Data.HashSet qualified as HashSet
 import HotGoss.Protocol
 import HotGoss.Union
 import Prelude hiding (Read, on)
-
-import qualified Data.HashSet as HashSet
 
 data Broadcast = Broadcast
   { msgId :: MessageId

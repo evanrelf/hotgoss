@@ -15,17 +15,16 @@ module HotGoss.Protocol
 where
 
 import Data.Aeson hiding (Error)
+import Data.Aeson.KeyMap qualified as KeyMap
 import Data.Aeson.Types (Parser)
+import Data.ByteString.Lazy qualified as LByteString
 import Data.Data (Data)
+import Data.Data qualified as Data
 import Data.Text.Display (Display)
 import Deriving.Aeson
 import GHC.Generics (Rep)
 import HotGoss.ErrorCode (ErrorCode)
-
-import qualified Data.Aeson.KeyMap as KeyMap
-import qualified Data.ByteString.Lazy as LByteString
-import qualified Data.Data as Data
-import qualified UnliftIO.Exception as Exception
+import UnliftIO.Exception qualified as Exception
 
 data Message o a = Message
   { src :: NodeId

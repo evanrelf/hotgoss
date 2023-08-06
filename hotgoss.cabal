@@ -18,6 +18,7 @@ common common
     DerivingStrategies
     DerivingVia
     DuplicateRecordFields
+    ImportQualifiedPost
     LambdaCase
     OverloadedRecordDot
     OverloadedStrings
@@ -37,6 +38,7 @@ common common
     -Widentities
     -Wmissing-home-modules
     -Wno-unticked-promoted-constructors
+    -Wprepositive-qualified-module
     -Wredundant-constraints
 
 common executable

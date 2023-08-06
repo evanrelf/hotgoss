@@ -1,6 +1,6 @@
 module Main (main) where
 
-import qualified HotGoss
+import HotGoss qualified
 
 main :: IO ()
 main = HotGoss.main
