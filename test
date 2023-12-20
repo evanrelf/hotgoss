@@ -4,8 +4,8 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 echo "Building hotgoss"
-cabal build
-hotgoss=$(cabal list-bin hotgoss)
+cargo build
+hotgoss="$PWD/target/debug/hotgoss"
 
 echo "Building maelstrom"
 maelstrom=$(nix build --file maelstrom.nix --no-link --print-out-paths)

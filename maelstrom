@@ -11,7 +11,7 @@ bin=false
 
 for arg in "$@"; do
   if [ "$bin" = true ]; then
-    args+=("$(cabal list-bin "$arg")")
+    args+=("$PWD/target/debug/$arg")
     bin=false
     continue
   fi
