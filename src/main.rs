@@ -1,3 +1,5 @@
+mod challenge_1;
+
 use anyhow::Context as _;
 use clap::Parser as _;
 use std::path::PathBuf;
@@ -19,10 +21,10 @@ fn main() -> anyhow::Result<()> {
         .to_str()
         .context("Binary name not valid UTF-8")?;
 
-    #[allow(clippy::match_single_binding)]
     match binary {
-        binary => {
-            anyhow::bail!("wtf does {binary} mean");
-        }
+        "hotgoss-1" => challenge_1::main()?,
+        binary => anyhow::bail!("wtf does {binary} mean"),
     }
+
+    Ok(())
 }
