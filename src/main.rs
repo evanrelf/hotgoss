@@ -1,4 +1,5 @@
 mod challenge_1;
+mod protocol;
 
 use anyhow::Context as _;
 use clap::Parser as _;
