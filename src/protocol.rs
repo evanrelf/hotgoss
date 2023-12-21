@@ -1,9 +1,18 @@
 use serde::{Deserialize, Serialize};
-use std::io::Write as _;
+use std::{
+    fmt::{self, Display},
+    io::Write as _,
+};
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(transparent)]
 pub struct NodeId(pub String);
+
+impl Display for NodeId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 #[derive(Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
@@ -14,6 +23,12 @@ impl MessageId {
         let current = *self;
         *self = Self(self.0 + 1);
         current
+    }
+}
+
+impl Display for MessageId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

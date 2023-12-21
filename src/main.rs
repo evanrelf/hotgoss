@@ -1,4 +1,5 @@
 mod challenge_1;
+mod challenge_2;
 mod protocol;
 
 use anyhow::Context as _;
@@ -24,6 +25,7 @@ fn main() -> anyhow::Result<()> {
 
     match binary {
         "hotgoss-1" => challenge_1::main()?,
+        "hotgoss-2" => challenge_2::main()?,
         binary => anyhow::bail!("wtf does {binary} mean"),
     }
 
