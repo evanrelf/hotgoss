@@ -17,7 +17,7 @@ struct EchoOk {
 }
 
 pub fn main() -> anyhow::Result<()> {
-    let mut msg_id = MessageId(1);
+    let mut msg_id = MessageId(0);
 
     handle(|request: Init| {
         Ok(InitOk {
@@ -27,11 +27,9 @@ pub fn main() -> anyhow::Result<()> {
     })?;
 
     loop {
-        msg_id = MessageId(msg_id.0 + 1);
-
         handle(|request: Echo| {
             Ok(EchoOk {
-                msg_id,
+                msg_id: msg_id.next(),
                 in_reply_to: request.msg_id,
                 echo: request.echo,
             })

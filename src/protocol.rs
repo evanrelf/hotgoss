@@ -9,6 +9,14 @@ pub struct NodeId(pub String);
 #[serde(transparent)]
 pub struct MessageId(pub usize);
 
+impl MessageId {
+    pub fn next(&mut self) -> Self {
+        let current = *self;
+        *self = Self(self.0 + 1);
+        current
+    }
+}
+
 #[derive(Deserialize, Serialize)]
 pub struct Message<T> {
     pub src: NodeId,
@@ -51,7 +59,7 @@ where
     Ok(())
 }
 
-pub fn handle<Req, Res>(handler: impl Fn(Req) -> anyhow::Result<Res>) -> anyhow::Result<()>
+pub fn handle<Req, Res>(mut handler: impl FnMut(Req) -> anyhow::Result<Res>) -> anyhow::Result<()>
 where
     for<'de> Req: Deserialize<'de>,
     Res: Serialize,
