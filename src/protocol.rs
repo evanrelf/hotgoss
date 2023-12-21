@@ -6,7 +6,7 @@ use std::{
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct NodeId(pub String);
+pub struct NodeId(String);
 
 impl Display for NodeId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -16,9 +16,13 @@ impl Display for NodeId {
 
 #[derive(Clone, Copy, Deserialize, Serialize)]
 #[serde(transparent)]
-pub struct MessageId(pub usize);
+pub struct MessageId(usize);
 
 impl MessageId {
+    pub fn new() -> Self {
+        Self(0)
+    }
+
     pub fn next(&mut self) -> Self {
         let current = *self;
         *self = Self(self.0 + 1);
@@ -91,7 +95,7 @@ where
 }
 
 pub fn handle_init() -> anyhow::Result<(MessageId, NodeId, Vec<NodeId>)> {
-    let msg_id = MessageId(0);
+    let msg_id = MessageId::new();
 
     let mut node_id = None;
 
