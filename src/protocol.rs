@@ -17,16 +17,16 @@ pub struct Message<T> {
 }
 
 #[derive(Deserialize)]
+#[serde(rename = "init", tag = "type")]
 pub struct Init {
-    pub r#type: String,
     pub msg_id: MessageId,
     pub node_id: NodeId,
     pub node_ids: Vec<NodeId>,
 }
 
 #[derive(Serialize)]
+#[serde(rename = "init_ok", tag = "type")]
 pub struct InitOk {
-    pub r#type: String,
     pub msg_id: MessageId,
     pub in_reply_to: MessageId,
 }

@@ -2,16 +2,15 @@ use crate::protocol::{handle, Init, InitOk, MessageId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
+#[serde(rename = "echo", tag = "type")]
 struct Echo {
-    #[allow(dead_code)]
-    r#type: String,
     msg_id: MessageId,
     echo: String,
 }
 
 #[derive(Serialize)]
+#[serde(rename = "echo_ok", tag = "type")]
 struct EchoOk {
-    r#type: String,
     msg_id: MessageId,
     in_reply_to: MessageId,
     echo: String,
@@ -22,7 +21,6 @@ pub fn main() -> anyhow::Result<()> {
 
     handle(|request: Init| {
         Ok(InitOk {
-            r#type: String::from("init_ok"),
             msg_id,
             in_reply_to: request.msg_id,
         })
@@ -33,7 +31,6 @@ pub fn main() -> anyhow::Result<()> {
 
         handle(|request: Echo| {
             Ok(EchoOk {
-                r#type: String::from("echo_ok"),
                 msg_id,
                 in_reply_to: request.msg_id,
                 echo: request.echo,
