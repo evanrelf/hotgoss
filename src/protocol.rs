@@ -4,7 +4,7 @@ use std::{
     io::Write as _,
 };
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(transparent)]
 pub struct NodeId(String);
 
@@ -56,6 +56,13 @@ pub struct Init {
 pub struct InitOk {
     pub msg_id: MessageId,
     pub in_reply_to: MessageId,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Either<L, R> {
+    Left(L),
+    Right(R),
 }
 
 pub fn receive<T>() -> anyhow::Result<Message<T>>
