@@ -1,46 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::{
     fmt::{self, Display},
-    future::{ready, Future, Ready},
     io::Write as _,
-    pin::Pin,
-    task::Context,
-    task::Poll,
 };
-use tower_service::Service;
-
-pub struct Node {
-    msg_id: MessageId,
-    node_id: NodeId,
-    node_ids: Vec<NodeId>,
-}
-
-impl<Body> Service<Message<Body>> for Node
-where
-    Node: Service<Body>,
-{
-    type Response = Message<<Node as Service<Body>>::Response>;
-
-    type Error = <Node as Service<Body>>::Error;
-
-    type Future = Ready<Result<Self::Response, Self::Error>>;
-
-    fn poll_ready(&mut self, _context: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Poll::Ready(Ok(()))
-    }
-
-    fn call(&mut self, request: Message<Body>) -> Self::Future {
-        let response_body = todo!();
-
-        let response = Message {
-            src: request.dest,
-            dest: request.src,
-            body: response_body,
-        };
-
-        ready(Ok(response))
-    }
-}
 
 #[derive(Clone, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(transparent)]
