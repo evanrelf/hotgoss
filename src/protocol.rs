@@ -85,18 +85,18 @@ where
     Ok(())
 }
 
-pub fn handle<Req, Res>(mut handler: impl FnMut(Req) -> anyhow::Result<Res>) -> anyhow::Result<()>
+pub fn handle<Req, Res>(
+    mut handler: impl FnMut(Message<Req>) -> anyhow::Result<Res>,
+) -> anyhow::Result<()>
 where
     for<'de> Req: Deserialize<'de>,
     Res: Serialize,
 {
     let request = receive::<Req>()?;
-    let body = handler(request.body)?;
-    let response = Message {
-        src: request.dest,
-        dest: request.src,
-        body,
-    };
+    let src = request.dest.clone();
+    let dest = request.src.clone();
+    let body = handler(request)?;
+    let response = Message { src, dest, body };
     send::<Res>(&response)?;
     Ok(())
 }
@@ -108,12 +108,12 @@ pub fn handle_init() -> anyhow::Result<(MessageId, NodeId, Vec<NodeId>)> {
 
     let mut node_ids = None;
 
-    handle(|request: Init| {
-        node_id = Some(request.node_id);
-        node_ids = Some(request.node_ids);
+    handle(|request: Message<Init>| {
+        node_id = Some(request.body.node_id);
+        node_ids = Some(request.body.node_ids);
         Ok(InitOk {
             msg_id,
-            in_reply_to: request.msg_id,
+            in_reply_to: request.body.msg_id,
         })
     })?;
 

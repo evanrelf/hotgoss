@@ -1,4 +1,4 @@
-use crate::protocol::{handle, handle_init, Either, MessageId, NodeId};
+use crate::protocol::{handle, handle_init, Either, Message, MessageId, NodeId};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -50,26 +50,26 @@ pub fn main() -> anyhow::Result<()> {
 
     let (mut msg_id, _, _) = handle_init()?;
 
-    handle(|request: Topology| {
+    handle(|request: Message<Topology>| {
         Ok(TopologyOk {
             msg_id: msg_id.next(),
-            in_reply_to: request.msg_id,
+            in_reply_to: request.body.msg_id,
         })
     })?;
 
     loop {
-        handle(|request: Either<Broadcast, Read>| {
-            Ok(match request {
-                Either::Left(request) => {
-                    messages.push(request.message);
+        handle(|request: Message<Either<Broadcast, Read>>| {
+            Ok(match request.body {
+                Either::Left(body) => {
+                    messages.push(body.message);
                     Either::Left(BroadcastOk {
                         msg_id: msg_id.next(),
-                        in_reply_to: request.msg_id,
+                        in_reply_to: body.msg_id,
                     })
                 }
-                Either::Right(request) => Either::Right(ReadOk {
+                Either::Right(body) => Either::Right(ReadOk {
                     msg_id: msg_id.next(),
-                    in_reply_to: request.msg_id,
+                    in_reply_to: body.msg_id,
                     messages: messages.clone(),
                 }),
             })

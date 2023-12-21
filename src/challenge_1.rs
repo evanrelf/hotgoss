@@ -1,4 +1,4 @@
-use crate::protocol::{handle, handle_init, MessageId};
+use crate::protocol::{handle, handle_init, Message, MessageId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
@@ -20,11 +20,11 @@ pub fn main() -> anyhow::Result<()> {
     let (mut msg_id, _, _) = handle_init()?;
 
     loop {
-        handle(|request: Echo| {
+        handle(|request: Message<Echo>| {
             Ok(EchoOk {
                 msg_id: msg_id.next(),
-                in_reply_to: request.msg_id,
-                echo: request.echo,
+                in_reply_to: request.body.msg_id,
+                echo: request.body.echo,
             })
         })?;
     }
