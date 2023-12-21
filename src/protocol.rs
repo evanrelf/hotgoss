@@ -43,6 +43,19 @@ pub struct Message<T> {
     pub body: T,
 }
 
+impl<T> Message<T> {
+    pub fn map<U, F>(self, f: F) -> Message<U>
+    where
+        F: FnOnce(T) -> U,
+    {
+        Message {
+            src: self.src,
+            dest: self.dest,
+            body: f(self.body),
+        }
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(rename = "init", tag = "type")]
 pub struct Init {

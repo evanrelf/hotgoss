@@ -62,6 +62,7 @@ pub fn main() -> anyhow::Result<()> {
             Ok(match request.body {
                 Either::Left(body) => {
                     messages.push(body.message);
+
                     Either::Left(BroadcastOk {
                         msg_id: msg_id.next(),
                         in_reply_to: body.msg_id,
