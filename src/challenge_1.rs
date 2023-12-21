@@ -3,16 +3,15 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
 struct Echo {
-    #[serde(rename = "type")]
-    type_: String,
+    #[allow(dead_code)]
+    r#type: String,
     msg_id: MessageId,
     echo: String,
 }
 
 #[derive(Serialize)]
 struct EchoOk {
-    #[serde(rename = "type")]
-    type_: String,
+    r#type: String,
     msg_id: MessageId,
     in_reply_to: MessageId,
     echo: String,
@@ -23,7 +22,7 @@ pub fn main() -> anyhow::Result<()> {
 
     handle(|request: Init| {
         Ok(InitOk {
-            type_: String::from("init_ok"),
+            r#type: String::from("init_ok"),
             msg_id,
             in_reply_to: request.msg_id,
         })
@@ -34,7 +33,7 @@ pub fn main() -> anyhow::Result<()> {
 
         handle(|request: Echo| {
             Ok(EchoOk {
-                type_: String::from("echo_ok"),
+                r#type: String::from("echo_ok"),
                 msg_id,
                 in_reply_to: request.msg_id,
                 echo: request.echo,

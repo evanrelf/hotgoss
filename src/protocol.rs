@@ -18,8 +18,7 @@ pub struct Message<T> {
 
 #[derive(Deserialize)]
 pub struct Init {
-    #[serde(rename = "type")]
-    pub type_: String,
+    pub r#type: String,
     pub msg_id: MessageId,
     pub node_id: NodeId,
     pub node_ids: Vec<NodeId>,
@@ -27,8 +26,7 @@ pub struct Init {
 
 #[derive(Serialize)]
 pub struct InitOk {
-    #[serde(rename = "type")]
-    pub type_: String,
+    pub r#type: String,
     pub msg_id: MessageId,
     pub in_reply_to: MessageId,
 }
