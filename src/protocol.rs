@@ -89,3 +89,22 @@ where
     send::<Res>(&response)?;
     Ok(())
 }
+
+pub fn handle_init() -> anyhow::Result<(MessageId, NodeId, Vec<NodeId>)> {
+    let msg_id = MessageId(0);
+
+    let mut node_id = None;
+
+    let mut node_ids = None;
+
+    handle(|request: Init| {
+        node_id = Some(request.node_id);
+        node_ids = Some(request.node_ids);
+        Ok(InitOk {
+            msg_id,
+            in_reply_to: request.msg_id,
+        })
+    })?;
+
+    Ok((msg_id, node_id.unwrap(), node_ids.unwrap()))
+}

@@ -1,4 +1,4 @@
-use crate::protocol::{handle, Init, InitOk, MessageId};
+use crate::protocol::{handle, handle_init, MessageId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
@@ -17,14 +17,7 @@ struct EchoOk {
 }
 
 pub fn main() -> anyhow::Result<()> {
-    let mut msg_id = MessageId(0);
-
-    handle(|request: Init| {
-        Ok(InitOk {
-            msg_id,
-            in_reply_to: request.msg_id,
-        })
-    })?;
+    let (mut msg_id, _, _) = handle_init()?;
 
     loop {
         handle(|request: Echo| {
