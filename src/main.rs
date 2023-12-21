@@ -24,12 +24,14 @@ fn main() -> anyhow::Result<()> {
         .to_str()
         .context("Binary name not valid UTF-8")?;
 
-    match binary {
-        "hotgoss-1" => challenge_1::main()?,
-        "hotgoss-2" => challenge_2::main()?,
-        "hotgoss-3a" => challenge_3a::main()?,
-        binary => anyhow::bail!("wtf does {binary} mean"),
-    }
+    pollster::block_on(async {
+        match binary {
+            "hotgoss-1" => challenge_1::main(),
+            "hotgoss-2" => challenge_2::main(),
+            "hotgoss-3a" => challenge_3a::main(),
+            binary => anyhow::bail!("wtf does {binary} mean"),
+        }
+    })?;
 
     Ok(())
 }
